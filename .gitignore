@@ -18,3 +18,9 @@ dist/
 # misc
 .DS_Store
 *.log
+
+# Claude Code internals
+.claude/
+
+# TypeScript build cache
+tsconfig.tsbuildinfo

@@ -1,24 +1,27 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
-// Lazy SES client — credentials injected via env vars at runtime
-let _ses: SESClient | null = null;
-function getSES() {
-  if (!_ses) {
-    _ses = new SESClient({
-      region: process.env.SES_REGION ?? "us-east-1",
-      credentials: {
-        accessKeyId:     process.env.SES_AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.SES_AWS_SECRET_ACCESS_KEY!,
-      },
-    });
-  }
-  return _ses;
+const FROM    = process.env.SES_FROM_ADDRESS    ?? "CoTrackPro <admin@cotrackpro.com>";
+const KEY_ID  = process.env.SES_AWS_ACCESS_KEY_ID;
+const KEY_SEC = process.env.SES_AWS_SECRET_ACCESS_KEY;
+const REGION  = process.env.SES_REGION ?? "us-east-1";
+
+// Returns null when SES credentials are not yet configured (dev / staging)
+function getSES(): SESClient | null {
+  if (!KEY_ID || !KEY_SEC) return null;
+  return new SESClient({
+    region: REGION,
+    credentials: { accessKeyId: KEY_ID, secretAccessKey: KEY_SEC },
+  });
 }
 
-const FROM = process.env.SES_FROM_ADDRESS ?? "CoTrackPro <admin@cotrackpro.com>";
-
 async function send(to: string, subject: string, html: string) {
-  return getSES().send(
+  const ses = getSES();
+  if (!ses) {
+    // Graceful no-op in dev — log so the email content is still visible
+    console.log(`[email:dev] TO=${to} SUBJECT=${subject}`);
+    return;
+  }
+  return ses.send(
     new SendEmailCommand({
       Source: FROM,
       Destination: { ToAddresses: [to] },

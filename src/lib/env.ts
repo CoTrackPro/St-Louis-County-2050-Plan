@@ -37,24 +37,25 @@ const serverSchema = z.object({
   // Clerk
   CLERK_SECRET_KEY: z.string().startsWith("sk_", "Must be a Clerk secret key (sk_...)"),
 
-  // SES
-  SES_FROM_ADDRESS:        z.string().min(1, "SES_FROM_ADDRESS is required"),
-  SES_AWS_ACCESS_KEY_ID:   z.string().min(1, "SES_AWS_ACCESS_KEY_ID is required"),
-  SES_AWS_SECRET_ACCESS_KEY: z.string().min(1, "SES_AWS_SECRET_ACCESS_KEY is required"),
+  // SES — credentials optional (email logs to console in dev if missing)
+  SES_FROM_ADDRESS:          z.string().default("CoTrackPro <admin@cotrackpro.com>"),
+  SES_AWS_ACCESS_KEY_ID:     z.string().optional(),
+  SES_AWS_SECRET_ACCESS_KEY: z.string().optional(),
 
   // AI — optional (app runs in mock mode without them)
+  // empty string treated as "not set" via .transform
   AI_DEFAULT_PROVIDER: z.enum(["anthropic", "openai", "gemini"]).default("anthropic"),
-  ANTHROPIC_API_KEY:   z.string().startsWith("sk-ant-").optional(),
-  OPENAI_API_KEY:      z.string().optional(),
-  GEMINI_API_KEY:      z.string().optional(),
+  ANTHROPIC_API_KEY:   z.string().optional().transform(v => v || undefined),
+  OPENAI_API_KEY:      z.string().optional().transform(v => v || undefined),
+  GEMINI_API_KEY:      z.string().optional().transform(v => v || undefined),
 
   // ElevenLabs — optional
-  ELEVENLABS_API_KEY: z.string().optional(),
-  ELEVENLABS_VOICE_ID: z.string().optional(),
+  ELEVENLABS_API_KEY:  z.string().optional().transform(v => v || undefined),
+  ELEVENLABS_VOICE_ID: z.string().optional().transform(v => v || undefined),
 
   // MCP — optional (mock mode if missing)
-  MCP_SERVER_URL: z.string().url().optional(),
-  MCP_API_KEY:    z.string().optional(),
+  MCP_SERVER_URL: z.string().optional().transform(v => v || undefined),
+  MCP_API_KEY:    z.string().optional().transform(v => v || undefined),
 
   // Infrastructure
   S3_ASSETS_BUCKET:      z.string().default("cotrackpro-assets"),
@@ -68,7 +69,7 @@ const clientSchema = z.object({
   NEXT_PUBLIC_URL:                      z.string().url("NEXT_PUBLIC_URL must be a valid URL"),
   NEXT_PUBLIC_APP_NAME:                 z.string().default("CoTrackPro"),
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:    z.string().startsWith("pk_", "Must be a Clerk publishable key (pk_...)"),
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:   z.string().startsWith("pk_", "Must be a Stripe publishable key (pk_...)"),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:   z.string().startsWith("pk_").optional().transform(v => v || undefined),
   NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID:     z.string().optional(),
 });
 
