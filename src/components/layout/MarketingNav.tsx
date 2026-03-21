@@ -134,10 +134,15 @@ export default function MarketingNav() {
                 <button
                   onMouseEnter={() => setActiveDD(cat.id)}
                   onClick={() => setActiveDD(activeDD === cat.id ? null : cat.id)}
+                  aria-expanded={activeDD === cat.id}
+                  aria-haspopup="true"
                   className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors rounded-xl hover:bg-white/5"
                 >
                   {cat.label}
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDD === cat.id ? "rotate-180" : ""}`} />
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${activeDD === cat.id ? "rotate-180" : ""}`}
+                    aria-hidden="true"
+                  />
                 </button>
 
                 {activeDD === cat.id && (
@@ -208,10 +213,17 @@ export default function MarketingNav() {
                 </Link>
               ) : (
                 <div key={cat.id}>
-                  <button onClick={() => setActiveDD(activeDD === cat.id ? null : cat.id)}
-                    className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl">
+                  <button
+                    onClick={() => setActiveDD(activeDD === cat.id ? null : cat.id)}
+                    aria-expanded={activeDD === cat.id}
+                    aria-haspopup="true"
+                    className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl"
+                  >
                     {cat.label}
-                    <ChevronDown className={`w-4 h-4 transition-transform ${activeDD === cat.id ? "rotate-180" : ""}`} />
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${activeDD === cat.id ? "rotate-180" : ""}`}
+                      aria-hidden="true"
+                    />
                   </button>
                   {activeDD === cat.id && (
                     <div className="ml-4 mt-1 space-y-0.5">

@@ -5,11 +5,21 @@ import { sendWelcomeEmail, sendAccessRevokedEmail, sendPaymentFailedEmail } from
 import { captureError } from "@/lib/monitoring";
 import Stripe from "stripe";
 
-const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET!;
+const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
-  const sig  = req.headers.get("stripe-signature")!;
+  const sig  = req.headers.get("stripe-signature");
+
+  // Reject immediately if Stripe signature header is absent
+  if (!sig) {
+    return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 });
+  }
+
+  if (!WEBHOOK_SECRET) {
+    captureError(new Error("STRIPE_WEBHOOK_SECRET is not configured"), { context: "stripe-webhook-config" });
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
 
   let event: Stripe.Event;
   try {

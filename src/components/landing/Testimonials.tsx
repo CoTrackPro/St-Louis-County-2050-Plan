@@ -14,9 +14,9 @@ export default function Testimonials() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t, i) => (
+          {TESTIMONIALS.map((t) => (
             <div
-              key={i}
+              key={t.author}
               className="flex flex-col p-6 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-white/20 hover:-translate-y-1 transition-all duration-300"
             >
               <blockquote className="text-gray-300 leading-relaxed mb-6 flex-1 italic">

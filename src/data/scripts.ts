@@ -40,7 +40,9 @@ export const GENERIC_TEMPLATES: Record<ScriptTopic, Record<ReferralChannel, stri
   }
 };
 
-export const SCRIPT_TEMPLATES: any = {
+export type ScriptTemplates = Record<string, Record<string, Partial<Record<ScriptTopic, Partial<Record<ReferralChannel, string>>>>>>;
+
+export const SCRIPT_TEMPLATES: ScriptTemplates = {
   attorney: {
     client: {
       recommendation: {
