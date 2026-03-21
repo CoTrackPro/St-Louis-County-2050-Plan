@@ -1,46 +1,152 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import MarketingNav from "@/components/layout/MarketingNav";
+import MarketingFooter from "@/components/layout/MarketingFooter";
+import RolesSection from "@/components/landing/RolesSection";
+import { ArrowLeft, Heart, Zap, Layers, Rocket, Calendar, ArrowRight } from "lucide-react";
 
-const PLANS = [
-  { key: "bridges", name: "Bridges", icon: "🌉", price: "$19/mo", desc: "Co-parenting documentation" },
-  { key: "legal",   name: "Legal",   icon: "⚖️",  price: "$29/mo", desc: "Attorney tools" },
-  { key: "mental",  name: "Mental",  icon: "🧠",  price: "$19/mo", desc: "Wellness & safety" },
-  { key: "pro",     name: "Pro",     icon: "🚀",  price: "$59/mo", desc: "All modules", highlight: true },
+export const metadata: Metadata = {
+  title: "Pricing — CoTrackPro",
+  description: "Affordable tools for high-conflict custody. Monthly and annual plans for parents and professionals.",
+};
+
+const COACHING_PACKAGES = [
+  {
+    title: "Individual Session",
+    subtitle: "Strategic Triage",
+    sessions: "1 Session",
+    description: "Deep dive into a specific issue or strategy session via Zoom.",
+    url: "https://calendly.com/dougdevitre/individual-session-1-1-zoom",
+    Icon: Calendar,
+    color: "text-blue-400",
+    border: "border-blue-500/20 hover:border-blue-500/50",
+    bg: "bg-blue-500/10",
+  },
+  {
+    title: "Momentum Pack",
+    subtitle: "Action Plan",
+    sessions: "3 Sessions",
+    description: "Get moving with a short-term action plan and accountability.",
+    url: "https://calendly.com/dougdevitre/cotrackpro-member-momentum-pack-3-sessions",
+    Icon: Zap,
+    color: "text-yellow-400",
+    border: "border-yellow-500/20 hover:border-yellow-500/50",
+    bg: "bg-yellow-500/10",
+  },
+  {
+    title: "Build Pack",
+    subtitle: "System Building",
+    sessions: "6 Sessions",
+    description: "Establish strong habits and build your documentation system.",
+    url: "https://calendly.com/dougdevitre/cotrackpro-member-build-pack-6-sessions",
+    Icon: Layers,
+    color: "text-purple-400",
+    border: "border-purple-500/20 hover:border-purple-500/50",
+    bg: "bg-purple-500/10",
+  },
+  {
+    title: "Transform Pack",
+    subtitle: "Complete Overhaul",
+    sessions: "12 Sessions",
+    description: "Complete strategic overhaul and ongoing high-conflict management.",
+    url: "https://calendly.com/dougdevitre/cotrackpro-member-transform-pack-12-sessions",
+    Icon: Rocket,
+    color: "text-[#0ea5e9]",
+    border: "border-[#0ea5e9]/20 hover:border-[#0ea5e9]/50",
+    bg: "bg-[#0ea5e9]/10",
+  },
 ];
 
 export default function PricingPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-6 py-16">
-      <div className="max-w-4xl mx-auto text-center mb-12">
-        <Link href="/" className="text-indigo-600 text-sm hover:underline mb-4 inline-block">← Home</Link>
-        <h1 className="text-4xl font-bold text-indigo-900 mb-3">Simple, transparent pricing</h1>
-        <p className="text-indigo-700">Subscribe to the modules you need. Cancel anytime.</p>
-      </div>
+    <div className="min-h-screen bg-[#0a0f1e]">
+      <MarketingNav />
 
-      <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {PLANS.map((p) => (
-          <div
-            key={p.key}
-            className={`rounded-2xl p-6 ${
-              p.highlight ? "bg-indigo-600 text-white" : "bg-white text-gray-900"
-            } shadow-lg`}
+      <main className="pt-24 pb-12 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-[#fbbf24] hover:text-[#f59e0b] font-bold mb-8 transition-all hover:-translate-x-1"
           >
-            <div className="text-3xl mb-2">{p.icon}</div>
-            <h2 className={`text-xl font-bold mb-1 ${p.highlight ? "text-white" : "text-indigo-900"}`}>{p.name}</h2>
-            <p className={`text-2xl font-semibold mb-2 ${p.highlight ? "text-indigo-200" : "text-indigo-600"}`}>{p.price}</p>
-            <p className={`text-sm mb-4 ${p.highlight ? "text-indigo-100" : "text-gray-500"}`}>{p.desc}</p>
-            <Link
-              href="/sign-up"
-              className={`inline-block w-full text-center py-2.5 rounded-xl font-medium transition ${
-                p.highlight
-                  ? "bg-white text-indigo-600 hover:bg-indigo-50"
-                  : "bg-indigo-600 text-white hover:bg-indigo-700"
-              }`}
-            >
-              Get started
-            </Link>
+            <ArrowLeft className="w-5 h-5" />
+            Back to Home
+          </Link>
+
+          <div className="text-center mb-10">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Membership Plans</h1>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              Choose the plan that fits your situation. All plans include full access to the Vault, AI tools, and secure logging.
+            </p>
           </div>
-        ))}
-      </div>
-    </main>
+        </div>
+
+        {/* Roles + pricing section */}
+        <RolesSection />
+
+        {/* 1:1 Coaching */}
+        <div className="max-w-7xl mx-auto mb-24">
+          <div className="text-center mb-12">
+            <div className="inline-flex p-3 rounded-full bg-indigo-500/10 text-indigo-400 mb-6 border border-indigo-500/20">
+              <Zap className="w-8 h-8" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">1:1 Strategy Coaching</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+              Accelerate your results with personalized guidance. Choose a package to work directly with a high-conflict strategist.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {COACHING_PACKAGES.map((pkg) => (
+              <a
+                key={pkg.title}
+                href={pkg.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex flex-col p-6 rounded-2xl bg-white/[0.02] border ${pkg.border} transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group`}
+              >
+                <div className={`w-12 h-12 rounded-xl ${pkg.bg} ${pkg.color} flex items-center justify-center mb-6`}>
+                  <pkg.Icon className="w-6 h-6" />
+                </div>
+                <div className="mb-4">
+                  <div className={`text-xs font-bold uppercase tracking-wider mb-1 ${pkg.color}`}>{pkg.subtitle}</div>
+                  <h3 className="text-xl font-bold text-white">{pkg.title}</h3>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 w-fit mb-6">
+                  {pkg.sessions}
+                </span>
+                <p className="text-sm text-gray-400 leading-relaxed mb-8 flex-1">{pkg.description}</p>
+                <div className="flex items-center gap-2 text-sm font-bold text-white group-hover:text-[#fbbf24] transition-colors mt-auto">
+                  Book Now <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Pay What You Can */}
+        <div className="max-w-3xl mx-auto text-center bg-white/[0.03] border border-white/10 rounded-3xl p-8 sm:p-12 relative overflow-hidden mb-12">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-pink-500/5 rounded-full blur-[80px] pointer-events-none" />
+          <div className="relative z-10">
+            <div className="inline-flex p-3 rounded-full bg-pink-500/10 text-pink-500 mb-6 border border-pink-500/20">
+              <Heart className="w-8 h-8 fill-current" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Support Our Mission</h2>
+            <p className="text-gray-400 mb-8 leading-relaxed max-w-xl mx-auto">
+              We believe safety shouldn&apos;t have a price tag. If our standard plans are out of reach, or if you simply want to help us support families in crisis, please consider a contribution.
+            </p>
+            <a
+              href="/contact"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-pink-500/20 border border-pink-500/30 text-pink-400 font-bold hover:bg-pink-500/30 transition-all"
+            >
+              <Heart className="w-4 h-4" />
+              Pay What You Can
+            </a>
+            <p className="text-xs text-gray-500 mt-4">Reach out — we&apos;ll work with you.</p>
+          </div>
+        </div>
+      </main>
+
+      <MarketingFooter />
+    </div>
   );
 }

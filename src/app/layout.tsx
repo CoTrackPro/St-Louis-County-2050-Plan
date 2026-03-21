@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${geist.className} bg-gray-50 text-gray-900 antialiased`}>
+        <body className={`${geist.className} bg-[#0a0f1e] text-gray-100 antialiased`}>
           <HighlightInit
             projectId={process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID ?? ""}
             serviceName="cotrackpro-web"

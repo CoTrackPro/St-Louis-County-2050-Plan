@@ -1,47 +1,77 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+import MarketingNav from "@/components/layout/MarketingNav";
+import MarketingFooter from "@/components/layout/MarketingFooter";
+import StickyCTA from "@/components/layout/StickyCTA";
+import Hero from "@/components/landing/Hero";
+import ImpactMetrics from "@/components/landing/ImpactMetrics";
+import WhyThisExists from "@/components/landing/WhyThisExists";
+import RolesSection from "@/components/landing/RolesSection";
+import Testimonials from "@/components/landing/Testimonials";
+import FAQSection from "@/components/landing/FAQSection";
 
-const MODULES = [
-  { href: "/bridges", label: "Bridges", icon: "🌉", desc: "Co-parenting communication & documentation" },
-  { href: "/legal",   label: "Legal",   icon: "⚖️",  desc: "Attorney tools, intake, and drafting support" },
-  { href: "/mental",  label: "Mental",  icon: "🧠",  desc: "Trauma-informed wellness and safety plans" },
-  { href: "/dashboard", label: "Dashboard", icon: "📊", desc: "Unified case overview and analytics" },
-];
+export const metadata: Metadata = {
+  title: "CoTrackPro — Protect What Matters",
+  description:
+    "Child-centered toolkits for high-conflict families and family-law professionals. Evidence logs, BIFF templates, AI tools, and more.",
+  openGraph: {
+    title: "CoTrackPro — Protect What Matters",
+    description: "Child-centered toolkits for high-conflict families and professionals.",
+    url: "https://cotrackpro.com",
+    siteName: "CoTrackPro",
+    images: [{ url: "https://assets.cotrackpro.com/CoTrackPro%2BLogo.jpg" }],
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", title: "CoTrackPro", description: "Protect What Matters." },
+};
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center justify-center p-8">
-      <div className="max-w-4xl w-full text-center mb-12">
-        <h1 className="text-5xl font-bold text-indigo-900 mb-4">CoTrackPro</h1>
-        <p className="text-xl text-indigo-700">
-          Child-centered co-parenting, legal, and wellness platform
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#0a0f1e]">
+      <MarketingNav />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-3xl mb-12">
-        {MODULES.map((m) => (
-          <Link
-            key={m.href}
-            href={m.href}
-            className="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl hover:-translate-y-1 transition-all border border-indigo-100"
-          >
-            <div className="text-4xl mb-3">{m.icon}</div>
-            <h2 className="text-xl font-semibold text-indigo-900 mb-1">{m.label}</h2>
-            <p className="text-sm text-gray-500">{m.desc}</p>
-          </Link>
-        ))}
-      </div>
+      <main>
+        <Hero />
+        <ImpactMetrics />
+        <WhyThisExists />
+        <RolesSection />
+        <Testimonials />
+        <FAQSection />
 
-      <div className="flex gap-4">
-        <Link href="/sign-in" className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition">
-          Sign In
-        </Link>
-        <Link href="/sign-up" className="px-6 py-3 bg-white text-indigo-600 border border-indigo-300 rounded-xl font-medium hover:bg-indigo-50 transition">
-          Get Started
-        </Link>
-        <Link href="/pricing" className="px-6 py-3 text-indigo-600 font-medium hover:underline">
-          Pricing
-        </Link>
-      </div>
-    </main>
+        {/* Final CTA */}
+        <section className="py-24 px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0ea5e9]/10 border border-[#0ea5e9]/20 text-[#38bdf8] text-sm font-semibold mb-8">
+              <span className="w-2 h-2 rounded-full bg-[#0ea5e9] animate-pulse" />
+              Start Today
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-6 leading-tight">
+              Your child&apos;s safety can&apos;t wait.
+            </h2>
+            <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+              Join thousands of parents and professionals using CoTrackPro to protect children and reduce conflict in family courts.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="/pricing"
+                className="px-8 py-4 rounded-2xl bg-gradient-to-br from-[#0284c7] to-[#0ea5e9] text-white font-bold text-lg hover:shadow-[0_0_30px_rgba(14,165,233,0.4)] transition-all transform hover:-translate-y-1"
+              >
+                Get Access Now
+              </a>
+              <a
+                href="https://mailchi.mp/2ed059283bd7/signup"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-4 rounded-2xl border border-white/10 bg-white/5 text-white font-semibold text-lg hover:bg-white/10 hover:border-white/20 transition-all transform hover:-translate-y-1"
+              >
+                Free Weekly Tips
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <MarketingFooter />
+      <StickyCTA />
+    </div>
   );
 }

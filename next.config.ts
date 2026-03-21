@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://clerk.cotrackpro.com https://*.clerk.accounts.dev https://cdn.highlight.io",
               "frame-src https://js.stripe.com https://hooks.stripe.com",
               "connect-src 'self' https://api.stripe.com https://clerk.cotrackpro.com https://*.clerk.accounts.dev https://pub.highlight.io",
-              "img-src 'self' data: https://img.clerk.com",
+              "img-src 'self' data: https://img.clerk.com https://assets.cotrackpro.com",
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self'",
             ].join("; "),
