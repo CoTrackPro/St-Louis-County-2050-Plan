@@ -43,16 +43,26 @@ export function captureError(
     return;
   }
 
-  H.consumeError(error, undefined, meta as Record<string, string>);
+  // Signature: consumeError(error, secureSessionId?, requestId?, metadata?)
+  H.consumeError(error, undefined, undefined, meta);
 }
 
 /**
- * Identify a user in Highlight (call after Clerk auth resolves).
- * Ties session replays to a specific user for support/debugging.
+ * Identify a user in Highlight (client-side only).
+ * Call this from a client component after Clerk auth resolves.
+ * Uses the browser-side Highlight SDK, not the server H interface.
+ *
+ * Example in a client component:
+ *   import { identifyUser } from "@/lib/monitoring"
+ *   identifyUser(userId, email)
  */
 export function identifyUser(userId: string, email?: string) {
-  if (!isProd || !PROJECT_ID) return;
-  H.identify(email ?? userId, { id: userId });
+  if (typeof window === "undefined") return; // server-safe guard
+  if (!PROJECT_ID) return;
+  // Dynamically import client SDK to avoid server-side type conflicts
+  import("highlight.run").then(({ H: ClientH }) => {
+    ClientH.identify(email ?? userId, { id: userId });
+  }).catch(() => {/* silently ignore if not loaded */});
 }
 
 // Initialize on import (server-side only)
