@@ -46,13 +46,16 @@ export default function PartnerPage() {
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5 mb-14">
-            {PARTNER_TYPES.map((p) => (
-              <div key={p.title} className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-all">
-                <p className={`${p.color} mb-3`}><p.icon className="w-6 h-6" /></p>
-                <h3 className="font-bold text-white mb-2">{p.title}</h3>
-                <p className="text-sm text-gray-400">{p.desc}</p>
-              </div>
-            ))}
+            {PARTNER_TYPES.map((p) => {
+              const Icon = p.icon;
+              return (
+                <div key={p.title} className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-all">
+                  <div className={`${p.color} mb-3`}><Icon className="w-6 h-6" /></div>
+                  <h3 className="font-bold text-white mb-2">{p.title}</h3>
+                  <p className="text-sm text-gray-400">{p.desc}</p>
+                </div>
+              );
+            })}
           </div>
 
           <div className="rounded-3xl bg-white/[0.02] border border-white/10 p-8 sm:p-12 mb-10">

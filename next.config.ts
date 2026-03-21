@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Silence the workspace-root false-positive when node_modules are in parent dirs
+  turbopack: {
+    root: __dirname,
+  },
+
   experimental: {
     serverActions: {
       allowedOrigins: [

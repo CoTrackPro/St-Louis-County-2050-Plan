@@ -153,15 +153,26 @@ export default function RolesSection() {
                         })()}
                       </>
                     ) : role.singleAction ? (
-                      <a
-                        href={role.singleAction.url}
-                        target={role.singleAction.triggerModal ? undefined : "_blank"}
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 w-full px-6 py-4 rounded-2xl bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 transition-all"
-                      >
-                        {role.singleAction.label}
-                        <ChevronRight className="w-4 h-4" />
-                      </a>
+                      // triggerModal → internal /contact, otherwise external link
+                      role.singleAction.triggerModal ? (
+                        <Link
+                          href="/contact"
+                          className="flex items-center justify-center gap-2 w-full px-6 py-4 rounded-2xl bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 transition-all"
+                        >
+                          {role.singleAction.label}
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      ) : (
+                        <a
+                          href={role.singleAction.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 w-full px-6 py-4 rounded-2xl bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 transition-all"
+                        >
+                          {role.singleAction.label}
+                          <ChevronRight className="w-4 h-4" />
+                        </a>
+                      )
                     ) : null}
 
                     <p className="text-center text-xs text-gray-500 mt-1">

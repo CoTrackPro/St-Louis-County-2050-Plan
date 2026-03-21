@@ -36,7 +36,7 @@ const CONTACT_OPTIONS = [
     bg: "bg-green-500/10",
     border: "border-green-500/20",
     title: "Partnership Inquiry",
-    desc: "Agencies, courts, legal organizations — let&apos;s talk.",
+    desc: "Agencies, courts, legal organizations — let's talk.",
     action: "Partner With Us",
     href: "/partner",
   },
