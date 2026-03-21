@@ -59,9 +59,9 @@ jobs:
           CLERK_SECRET=$(fetch "/cotrackpro/prod/platform/clerk/secret_key")
 
           # ── SES ──────────────────────────────────────────────────────────────
-          SES_FROM=$(fetch       "/cotrackpro/prod/integrations/ses/from_address")
-          SES_KEY_ID=$(fetch     "/ses/aws_access_key_id")
-          SES_SECRET=$(fetch     "/ses/aws_secret_access_key")
+          SES_FROM=$(fetch              "/cotrackpro/prod/integrations/ses/from_address")
+          SES_KEY_ID=$(fetch_optional   "/ses/aws_access_key_id")
+          SES_SECRET=$(fetch_optional   "/ses/aws_secret_access_key")
 
           # ── AI ───────────────────────────────────────────────────────────────
           AI_PROVIDER=$(fetch             "/cotrackpro/prod/integrations/ai/default_provider")

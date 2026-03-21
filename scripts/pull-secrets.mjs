@@ -66,8 +66,9 @@ const SSM_MAP = {
   "/cotrackpro/prod/platform/clerk/secret_key":       "CLERK_SECRET_KEY",
 
   // ── VERCEL ────────────────────────────────────────────────────────────────
-  "/cotrackpro/prod/platform/vercel/project_id":  "VERCEL_PROJECT_ID",
-  "/cotrackpro/prod/platform/vercel/api_token":   "VERCEL_API_TOKEN",
+  "/cotrackpro/prod/vercel/org-id":  "VERCEL_ORG_ID",
+  "/cotrackpro/prod/vercel/user-id": "VERCEL_USER_ID",
+  "/cotrackpro/prod/vercel/secret":  "VERCEL_TOKEN",
 
   // ── MAILCHIMP ─────────────────────────────────────────────────────────────
   "/cotrackpro/prod/integrations/mailchimp/api_key": "MAILCHIMP_API_KEY",
@@ -133,7 +134,7 @@ function serializeEnv(map) {
     "# AI": ["AI_DEFAULT_PROVIDER", "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY"],
     "# ElevenLabs": ["ELEVENLABS_API_KEY", "ELEVENLABS_VOICE_ID"],
     "# Clerk": ["NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "CLERK_SECRET_KEY"],
-    "# Vercel": ["VERCEL_PROJECT_ID", "VERCEL_API_TOKEN"],
+    "# Vercel": ["VERCEL_ORG_ID", "VERCEL_USER_ID", "VERCEL_TOKEN"],
     "# Mailchimp": ["MAILCHIMP_API_KEY"],
     "# SES": ["SES_FROM_ADDRESS", "SES_AWS_ACCESS_KEY_ID", "SES_AWS_SECRET_ACCESS_KEY"],
     "# Infrastructure": ["S3_ASSETS_BUCKET", "DYNAMODB_USERS_TABLE"],
