@@ -1,6 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
+import { captureError } from "@/lib/monitoring";
 
 /**
  * POST /api/stripe/portal
@@ -37,8 +38,8 @@ export async function POST() {
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
+    captureError(err, { context: "stripe-portal", userId });
     const message = err instanceof Error ? err.message : "Failed to open billing portal";
-    console.error("[portal] Stripe error:", message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
