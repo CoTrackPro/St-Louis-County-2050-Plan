@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "secrets": "node scripts/pull-secrets.mjs",
-    "test:e2e": "node scripts/test-e2e.mjs"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "node scripts/test-e2e.mjs",
+    "test:all": "npm run test && echo '\\n--- Unit tests passed. Start dev server and run: npm run test:e2e ---'"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.1013.0",
@@ -24,12 +28,19 @@
   "devDependencies": {
     "@aws-sdk/client-ssm": "^3.1013.0",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.3",
+    "jsdom": "^29.0.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.0"
   }
 }

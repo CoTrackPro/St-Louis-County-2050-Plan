@@ -65,10 +65,22 @@ async function assertStatus(name, method, path, expectedStatus, opts = {}) {
 
 async function testPublicRoutes() {
   console.log("\n📋  Public routes (expect 200)");
+  // Core pages
   await assertStatus("GET /",        "GET",  "/",        200);
   await assertStatus("GET /pricing", "GET",  "/pricing", 200);
   await assertStatus("GET /sign-in", "GET",  "/sign-in", 200);
   await assertStatus("GET /sign-up", "GET",  "/sign-up", 200);
+  // Marketing pages
+  await assertStatus("GET /mission", "GET",  "/mission", 200);
+  await assertStatus("GET /faq",     "GET",  "/faq",     200);
+  await assertStatus("GET /contact", "GET",  "/contact", 200);
+  await assertStatus("GET /partner", "GET",  "/partner", 200);
+  await assertStatus("GET /privacy", "GET",  "/privacy", 200);
+}
+
+async function testNotFound() {
+  console.log("\n🔍  404 handling");
+  await assertStatus("GET /nonexistent-page", "GET", "/nonexistent-page-xyz-abc", 404);
 }
 
 async function testProtectedRoutes() {
@@ -205,6 +217,7 @@ async function main() {
   }
 
   await testPublicRoutes();
+  await testNotFound();
   await testProtectedRoutes();
   await testStripeWebhook();
   await testCheckout();
