@@ -2,13 +2,11 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
-  // Safelist dynamic accent classes used in roles.ts (assembled at runtime, not statically scanned)
-  safelist: [
-    "text-brand-500",
-    "text-indigo-400",
-    "text-green-500",
-    "text-orange-500",
-  ],
+  // Dynamic accentColor classes (text-brand-500, text-indigo-400, text-green-500,
+  // text-orange-500) are safe from purging:
+  //   • text-brand-500 is defined in globals.css @layer utilities (always included)
+  //   • text-indigo-400 / text-green-500 / text-orange-500 appear literally in
+  //     src/data/roles.ts, which is covered by the content glob above
   theme: {
     extend: {
       colors: {

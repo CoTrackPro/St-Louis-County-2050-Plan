@@ -2,82 +2,19 @@
 import { useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import NavBar from "@/components/layout/NavBar";
-
-const PLANS: {
-  key: string;
-  name: string;
-  tier: string;
-  billing: string;
-  icon: string;
-  price: string;
-  badge?: string;
-  features: string[];
-  highlight?: boolean;
-}[] = [
-  {
-    key: "parent_monthly",
-    tier: "parent",
-    billing: "monthly",
-    name: "Parent",
-    icon: "👨‍👧",
-    price: "Monthly",
-    features: [
-      "Bridges — co-parenting docs",
-      "Mental — wellness & safety plans",
-      "Incident & communication logs",
-      "Court-ready summaries",
-    ],
-  },
-  {
-    key: "parent_annual",
-    tier: "parent",
-    billing: "annual",
-    name: "Parent",
-    icon: "👨‍👧",
-    price: "Annual",
-    badge: "Save ~17%",
-    features: ["Everything in Parent Monthly", "2 months free", "Annual receipt for records"],
-    highlight: false,
-  },
-  {
-    key: "professional_monthly",
-    tier: "professional",
-    billing: "monthly",
-    name: "Professional",
-    icon: "⚖️",
-    price: "Monthly",
-    features: [
-      "All Parent features",
-      "Legal — attorney tools",
-      "Case checklists & drafting",
-      "8th Circuit appeal workflow",
-    ],
-    highlight: true,
-  },
-  {
-    key: "professional_annual",
-    tier: "professional",
-    billing: "annual",
-    name: "Professional",
-    icon: "⚖️",
-    price: "Annual",
-    badge: "Best value",
-    features: ["Everything in Professional Monthly", "2 months free", "Priority support"],
-    highlight: false,
-  },
-];
+import { PLANS } from "@/data/billing";
 
 function BillingContent() {
   const params = useSearchParams();
   const upgrade = params.get("upgrade"); // "parent" or "professional"
-  const [loading, setLoading] = useState<string | null>(null);
+  const [loading, setLoading]           = useState<string | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   async function checkout(plan: string) {
     setLoading(plan);
     setCheckoutError(null);
     try {
-      const res = await fetch("/api/stripe/checkout", {
+      const res  = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),
@@ -104,13 +41,17 @@ function BillingContent() {
 
         {upgrade && (
           <div className="mb-6 px-4 py-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-sm text-amber-300">
-            You need a <strong className="capitalize">{upgrade}</strong> plan to access that feature.
+            You need a <strong className="capitalize">{upgrade}</strong> plan to access that
+            feature.
           </div>
         )}
 
         {checkoutError && (
-          <div className="mb-6 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl text-sm text-red-300 flex items-center gap-2">
-            <span>⚠️</span>
+          <div
+            role="alert"
+            className="mb-6 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl text-sm text-red-300 flex items-center gap-2"
+          >
+            <span aria-hidden="true">⚠️</span>
             <span>{checkoutError}</span>
           </div>
         )}
@@ -128,7 +69,7 @@ function BillingContent() {
                 }`}
               >
                 <div className="flex items-start justify-between mb-2">
-                  <span className="text-3xl">{plan.icon}</span>
+                  <span className="text-3xl" aria-hidden="true">{plan.icon}</span>
                   {plan.badge && (
                     <span className="text-xs font-semibold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
                       {plan.badge}
@@ -140,7 +81,7 @@ function BillingContent() {
                 <ul className="text-sm text-gray-400 space-y-1.5 mb-6 flex-1">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2">
-                      <span className="text-emerald-400 mt-0.5 shrink-0">✓</span>
+                      <span className="text-emerald-400 mt-0.5 shrink-0" aria-hidden="true">✓</span>
                       <span>{f}</span>
                     </li>
                   ))}

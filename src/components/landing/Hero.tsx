@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight, Mail } from "lucide-react";
+import { useAudienceCarousel } from "@/hooks/useAudienceCarousel";
+import { NEWSLETTER_URL } from "@/data/billing";
 
 const AUDIENCES = [
   "Protective Parents",
@@ -14,25 +16,20 @@ const AUDIENCES = [
   "Law Enforcement",
 ];
 
-export default function Hero() {
-  const [idx, setIdx]           = useState(0);
-  const [animating, setAnimating] = useState(false);
+const TRUST_BADGES = [
+  { icon: "🔒", text: "Secure access" },
+  { icon: "⚡", text: "Fast learning modules" },
+  { icon: "📦", text: "Downloadable resources" },
+  { icon: "🧭", text: "Best-interests pathways" },
+];
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      setAnimating(true);
-      setTimeout(() => {
-        setIdx((p) => (p + 1) % AUDIENCES.length);
-        setAnimating(false);
-      }, 500);
-    }, 3000);
-    return () => clearInterval(t);
-  }, []);
+export default function Hero() {
+  const { current, animating } = useAudienceCarousel(AUDIENCES);
 
   return (
     <div className="relative pt-24 pb-0 px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center overflow-hidden">
-      {/* Grid background */}
-      <div className="absolute inset-0 pointer-events-none z-0">
+      {/* Perspective grid background */}
+      <div className="absolute inset-0 pointer-events-none z-0" aria-hidden="true">
         <div
           className="absolute inset-0 opacity-20"
           style={{
@@ -50,13 +47,18 @@ export default function Hero() {
 
       <div className="relative z-10 flex flex-col items-center w-full">
         {/* Floating logo */}
-        <div className="relative mb-8 group cursor-default" style={{ animation: "fadeInUp 0.8s ease-out forwards" }}>
+        <div
+          className="relative mb-8 group cursor-default"
+          style={{ animation: "fadeInUp 0.8s ease-out forwards" }}
+        >
           <div className="absolute inset-0 bg-[#0ea5e9]/30 blur-3xl rounded-full opacity-40 group-hover:opacity-60 transition-opacity duration-700 animate-pulse-slow" />
           <div className="relative p-5 rounded-3xl bg-white/10 border border-white/10 backdrop-blur-xl group-hover:border-[#0ea5e9]/30 transition-colors duration-500 shadow-2xl shadow-black/50 animate-float">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="https://assets.cotrackpro.com/CoTrackPro%2BLogo.jpg"
               alt="CoTrackPro Logo"
+              width={96}
+              height={96}
+              priority
               className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-lg object-cover"
             />
           </div>
@@ -78,8 +80,10 @@ export default function Hero() {
             className={`inline-block font-bold text-[#38bdf8] transition-all duration-500 transform ${
               animating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"
             }`}
+            aria-live="polite"
+            aria-atomic="true"
           >
-            {AUDIENCES[idx]}
+            {current}
           </span>
         </h2>
 
@@ -87,14 +91,17 @@ export default function Hero() {
           className="max-w-3xl text-base sm:text-lg text-gray-300 mb-10 leading-relaxed"
           style={{ animation: "fadeInUp 0.8s ease-out 0.6s both" }}
         >
-          We help family-practice professionals implement child-centered, trauma-informed support. Access a modern learning + action vault with{" "}
+          We help family-practice professionals implement child-centered, trauma-informed
+          support. Access a modern learning + action vault with{" "}
           <strong className="text-white font-semibold">Pathways</strong>,{" "}
           <strong className="text-white font-semibold">Playbooks</strong>,{" "}
           <strong className="text-white font-semibold">Checklists</strong>,{" "}
           <strong className="text-white font-semibold">Infographics</strong>,{" "}
           <strong className="text-white font-semibold">Videos</strong>,{" "}
           <strong className="text-white font-semibold">Podcasts</strong>, and{" "}
-          <strong className="text-white font-semibold">Interactive Apps</strong>—built to help people respond faster, document better, and protect children under real-world pressure.
+          <strong className="text-white font-semibold">Interactive Apps</strong>—built to
+          help people respond faster, document better, and protect children under real-world
+          pressure.
         </p>
 
         <div
@@ -112,7 +119,7 @@ export default function Hero() {
             </span>
           </Link>
           <a
-            href="https://mailchi.mp/2ed059283bd7/signup"
+            href={NEWSLETTER_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border border-white/10 bg-white/5 text-white font-semibold text-lg hover:bg-white/10 hover:border-white/20 transition-all transform hover:-translate-y-1 backdrop-blur-sm"
@@ -126,14 +133,13 @@ export default function Hero() {
           className="flex flex-wrap justify-center gap-x-8 gap-y-4 mt-12 text-sm font-medium text-gray-400"
           style={{ animation: "fadeInUp 0.8s ease-out 1s both" }}
         >
-          {[
-            { icon: "🔒", text: "Secure access" },
-            { icon: "⚡", text: "Fast learning modules" },
-            { icon: "📦", text: "Downloadable resources" },
-            { icon: "🧭", text: "Best-interests pathways" },
-          ].map(({ icon, text }) => (
-            <span key={text} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-default">
-              <span>{icon}</span> {text}
+          {TRUST_BADGES.map(({ icon, text }) => (
+            <span
+              key={text}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-default"
+            >
+              <span aria-hidden="true">{icon}</span>
+              {text}
             </span>
           ))}
         </div>

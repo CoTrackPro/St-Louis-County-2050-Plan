@@ -6,6 +6,16 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
 
+  // Allow next/image to optimise images from the CDN
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "assets.cotrackpro.com",
+      },
+    ],
+  },
+
   experimental: {
     serverActions: {
       allowedOrigins: [
@@ -38,7 +48,8 @@ const nextConfig: NextConfig = {
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://clerk.cotrackpro.com https://*.clerk.accounts.dev https://cdn.highlight.io https://elevenlabs.io https://*.elevenlabs.io",
               "frame-src https://js.stripe.com https://hooks.stripe.com https://elevenlabs.io https://*.elevenlabs.io",
               "connect-src 'self' https://api.stripe.com https://clerk.cotrackpro.com https://*.clerk.accounts.dev https://pub.highlight.io https://api.elevenlabs.io https://*.elevenlabs.io",
-              "img-src 'self' data: https://img.clerk.com https://assets.cotrackpro.com",
+              // next/image optimisation endpoint serves from 'self'; CDN images go via /_next/image
+              "img-src 'self' data: blob: https://img.clerk.com https://assets.cotrackpro.com",
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self'",
             ].join("; "),

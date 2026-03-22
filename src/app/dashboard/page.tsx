@@ -1,12 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import NavBar from "@/components/layout/NavBar";
 import Link from "next/link";
-
-const MODULES = [
-  { key: "bridges", href: "/bridges", icon: "🌉", label: "Bridges",  desc: "Co-parenting docs & communication logs" },
-  { key: "legal",   href: "/legal",   icon: "⚖️",  label: "Legal",    desc: "Attorney intake, checklists, drafting" },
-  { key: "mental",  href: "/mental",  icon: "🧠",  label: "Mental",   desc: "Wellness plans & safety documentation" },
-];
+import { MODULES } from "@/data/dashboard";
 
 export default async function DashboardPage() {
   const { sessionClaims } = await auth();
@@ -36,7 +31,7 @@ export default async function DashboardPage() {
                     : "bg-white/[0.02] border-white/10 opacity-60"
                 }`}
               >
-                <div className="text-3xl mb-3">{m.icon}</div>
+                <div className="text-3xl mb-3" aria-hidden="true">{m.icon}</div>
                 <h2 className="text-lg font-semibold text-white">{m.label}</h2>
                 <p className="text-sm text-gray-400 mb-4">{m.desc}</p>
                 {hasAccess ? (
