@@ -35,9 +35,9 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://clerk.cotrackpro.com https://*.clerk.accounts.dev https://cdn.highlight.io",
-              "frame-src https://js.stripe.com https://hooks.stripe.com",
-              "connect-src 'self' https://api.stripe.com https://clerk.cotrackpro.com https://*.clerk.accounts.dev https://pub.highlight.io",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://clerk.cotrackpro.com https://*.clerk.accounts.dev https://cdn.highlight.io https://elevenlabs.io https://*.elevenlabs.io",
+              "frame-src https://js.stripe.com https://hooks.stripe.com https://elevenlabs.io https://*.elevenlabs.io",
+              "connect-src 'self' https://api.stripe.com https://clerk.cotrackpro.com https://*.clerk.accounts.dev https://pub.highlight.io https://api.elevenlabs.io https://*.elevenlabs.io",
               "img-src 'self' data: https://img.clerk.com https://assets.cotrackpro.com",
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self'",
