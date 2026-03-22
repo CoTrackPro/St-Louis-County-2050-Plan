@@ -37,6 +37,7 @@ export async function mcpCall<T = unknown>(req: McpRequest): Promise<McpResponse
       Authorization: `Bearer ${process.env.MCP_API_KEY ?? ""}`,
     },
     body: JSON.stringify(req),
+    signal: AbortSignal.timeout(10_000),
   });
 
   if (!res.ok) {

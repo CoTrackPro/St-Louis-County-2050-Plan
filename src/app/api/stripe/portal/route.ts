@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { captureError } from "@/lib/monitoring";
 
+const SITE_URL = process.env.NEXT_PUBLIC_URL ?? "https://cotrackpro.com";
+
 /**
  * POST /api/stripe/portal
  *
@@ -33,7 +35,7 @@ export async function POST() {
   try {
     const session = await stripe.billingPortal.sessions.create({
       customer:   customerId,
-      return_url: `${process.env.NEXT_PUBLIC_URL}/billing`,
+      return_url: `${SITE_URL}/billing`,
     });
 
     return NextResponse.json({ url: session.url });

@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe, PLANS, PlanKey } from "@/lib/stripe";
 import { captureError } from "@/lib/monitoring";
 
+const SITE_URL = process.env.NEXT_PUBLIC_URL ?? "https://cotrackpro.com";
+
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
@@ -35,8 +37,8 @@ export async function POST(req: NextRequest) {
         tier: PLANS[plan].tier,
         modules: PLANS[plan].modules,
       },
-      success_url: `${process.env.NEXT_PUBLIC_URL}/dashboard?checkout=success`,
-      cancel_url:  `${process.env.NEXT_PUBLIC_URL}/billing?checkout=cancelled`,
+      success_url: `${SITE_URL}/dashboard?checkout=success`,
+      cancel_url:  `${SITE_URL}/billing?checkout=cancelled`,
       subscription_data: {
         metadata: {
           userId,

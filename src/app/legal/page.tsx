@@ -1,13 +1,11 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import NavBar from "@/components/layout/NavBar";
+import { LEGAL_TOOLS } from "@/data/modules";
 
-const TOOLS = [
-  { title: "Client Intake",      desc: "Structured intake forms and issue spotting" },
-  { title: "Case Checklists",    desc: "Jurisdiction-specific procedural checklists" },
-  { title: "Drafting Assistant", desc: "Document structure and clause organization" },
-  { title: "8th Circuit Appeals", desc: "Protection order appeal workflow and deadlines" },
-];
-
-export default function LegalPage() {
+export default async function LegalPage() {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
   return (
     <>
       <NavBar />
@@ -21,7 +19,7 @@ export default function LegalPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {TOOLS.map((card) => (
+          {LEGAL_TOOLS.map((card) => (
             <div
               key={card.title}
               className="bg-white/[0.03] rounded-xl border border-white/10 p-5 cursor-pointer hover:border-[#0ea5e9]/40 hover:bg-white/[0.06] transition-all duration-200"

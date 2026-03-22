@@ -2,12 +2,9 @@ import {
   Shield, Brain, Megaphone, MessageCircle,
   Users, HeartHandshake, Gavel,
   Briefcase, Landmark,
-  Stethoscope, ClipboardList,
+  Stethoscope,
   Search, Siren, PenTool, Headphones,
 } from "lucide-react";
-
-// Suppress unused import warning — ClipboardList kept for future menu items
-void ClipboardList;
 
 export type NavItem = {
   label: string;

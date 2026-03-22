@@ -2,27 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import MarketingNav from "@/components/layout/MarketingNav";
 import MarketingFooter from "@/components/layout/MarketingFooter";
-import { ArrowLeft, Building2, Gavel, HeartHandshake, Users, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, HeartHandshake, CheckCircle2 } from "lucide-react";
+import { PARTNER_TYPES, BENEFITS } from "@/data/partner";
 
 export const metadata: Metadata = {
   title: "Partner With Us — CoTrackPro",
   description: "Bring CoTrackPro to your organization. We partner with courts, legal aid societies, DV shelters, and family service agencies.",
 };
-
-const PARTNER_TYPES = [
-  { icon: Gavel,          color: "text-yellow-400", title: "Courts & Judiciary",    desc: "Standardize documentation and reduce court-time waste." },
-  { icon: Building2,      color: "text-[#38bdf8]",  title: "Legal Aid Societies",   desc: "Extend your reach with AI-assisted tools for pro-se clients." },
-  { icon: HeartHandshake, color: "text-pink-400",   title: "DV Shelters & Advocacy",desc: "Give survivors a structured, private path to safety." },
-  { icon: Users,          color: "text-green-400",  title: "Family Service Agencies",desc: "Equip case managers with trauma-informed tools." },
-];
-
-const BENEFITS = [
-  "Bulk licensing for your staff or clients",
-  "White-label options available",
-  "Staff onboarding and training",
-  "API access for system integration",
-  "Dedicated account support",
-];
 
 export default function PartnerPage() {
   return (

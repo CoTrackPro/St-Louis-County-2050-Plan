@@ -27,16 +27,20 @@ export function useAudienceCarousel(
   useEffect(() => {
     if (items.length <= 1) return;
 
+    let swap: ReturnType<typeof setTimeout> | undefined;
+
     const timer = setInterval(() => {
       setAnimating(true);
-      const swap = setTimeout(() => {
+      swap = setTimeout(() => {
         setIdx((prev) => (prev + 1) % items.length);
         setAnimating(false);
       }, transitionMs);
-      return () => clearTimeout(swap);
     }, intervalMs);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(swap);
+    };
   }, [items.length, intervalMs, transitionMs]);
 
   return { current: items[idx], animating };

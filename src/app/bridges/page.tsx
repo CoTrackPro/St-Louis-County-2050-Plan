@@ -1,13 +1,11 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import NavBar from "@/components/layout/NavBar";
+import { BRIDGES_TOOLS } from "@/data/modules";
 
-const TOOLS = [
-  { title: "Incident Log",          desc: "Document exchanges, violations, or concerns" },
-  { title: "Communication Tracker", desc: "Log co-parent messages and responses" },
-  { title: "Court-Ready Summary",   desc: "Generate neutral narrative from your notes" },
-  { title: "Evidence Timeline",     desc: "Build a chronological evidence record" },
-];
-
-export default function BridgesPage() {
+export default async function BridgesPage() {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
   return (
     <>
       <NavBar />
@@ -21,7 +19,7 @@ export default function BridgesPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {TOOLS.map((card) => (
+          {BRIDGES_TOOLS.map((card) => (
             <div
               key={card.title}
               className="bg-white/[0.03] rounded-xl border border-white/10 p-5 cursor-pointer hover:border-[#0ea5e9]/40 hover:bg-white/[0.06] transition-all duration-200"

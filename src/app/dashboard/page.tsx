@@ -1,10 +1,12 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import NavBar from "@/components/layout/NavBar";
 import Link from "next/link";
 import { MODULES } from "@/data/dashboard";
 
 export default async function DashboardPage() {
-  const { sessionClaims } = await auth();
+  const { userId, sessionClaims } = await auth();
+  if (!userId) redirect("/sign-in");
   const user = await currentUser();
   const access = (sessionClaims?.metadata as Record<string, unknown>)?.access as
     | Record<string, boolean>

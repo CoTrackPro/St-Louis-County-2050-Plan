@@ -1,13 +1,11 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import NavBar from "@/components/layout/NavBar";
+import { MENTAL_TOOLS } from "@/data/modules";
 
-const TOOLS = [
-  { title: "Safety Plan",         desc: "Build a personalized crisis safety plan" },
-  { title: "Wellness Journal",    desc: "Private, encrypted emotional health log" },
-  { title: "De-escalation Tools", desc: "Rewrite triggering messages to calm tone" },
-  { title: "Resource Navigator",  desc: "Local and national support resources" },
-];
-
-export default function MentalPage() {
+export default async function MentalPage() {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
   return (
     <>
       <NavBar />
@@ -21,7 +19,7 @@ export default function MentalPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {TOOLS.map((card) => (
+          {MENTAL_TOOLS.map((card) => (
             <div
               key={card.title}
               className="bg-white/[0.03] rounded-xl border border-white/10 p-5 cursor-pointer hover:border-purple-500/40 hover:bg-white/[0.06] transition-all duration-200"

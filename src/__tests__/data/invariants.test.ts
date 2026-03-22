@@ -17,6 +17,12 @@ import { MODULES }                   from "@/data/dashboard";
 import { SOCIAL, FOOTER_COLS }       from "@/data/footer";
 import { QUIZ_BANK }                 from "@/data/quizBank";
 import { SCRIPT_TEMPLATES, GENERIC_TEMPLATES, COMMON_OBJECTIONS } from "@/data/scripts";
+import { BRIDGES_TOOLS, MENTAL_TOOLS, LEGAL_TOOLS } from "@/data/modules";
+import { COACHING_PACKAGES } from "@/data/coaching";
+import { CONTACT_OPTIONS } from "@/data/contact";
+import { VALUES } from "@/data/mission";
+import { PARTNER_TYPES, BENEFITS } from "@/data/partner";
+import { DASHBOARD_NAV } from "@/data/dashboard";
 
 // ─── NAV ────────────────────────────────────────────────────────────────────
 
@@ -284,5 +290,135 @@ describe("scripts (data/scripts.ts)", () => {
   it("COMMON_OBJECTIONS is a non-empty array of strings", () => {
     expect(COMMON_OBJECTIONS.length).toBeGreaterThan(0);
     COMMON_OBJECTIONS.forEach((o) => expect(typeof o).toBe("string"));
+  });
+});
+
+// ─── MODULE TOOLS ────────────────────────────────────────────────────────────
+
+describe("module tools (data/modules.ts)", () => {
+  it.each([
+    ["BRIDGES_TOOLS", BRIDGES_TOOLS],
+    ["MENTAL_TOOLS",  MENTAL_TOOLS],
+    ["LEGAL_TOOLS",   LEGAL_TOOLS],
+  ])("%s has exactly 4 tools", (_name, tools) => {
+    expect(tools).toHaveLength(4);
+  });
+
+  it.each([
+    ["BRIDGES_TOOLS", BRIDGES_TOOLS],
+    ["MENTAL_TOOLS",  MENTAL_TOOLS],
+    ["LEGAL_TOOLS",   LEGAL_TOOLS],
+  ])("every %s tool has title and desc", (_name, tools) => {
+    tools.forEach((t) => {
+      expect(t.title).toBeTruthy();
+      expect(t.desc).toBeTruthy();
+    });
+  });
+});
+
+// ─── COACHING_PACKAGES ───────────────────────────────────────────────────────
+
+describe("COACHING_PACKAGES (data/coaching.ts)", () => {
+  it("has exactly 4 packages", () => {
+    expect(COACHING_PACKAGES).toHaveLength(4);
+  });
+
+  it("every package has required fields", () => {
+    COACHING_PACKAGES.forEach((p) => {
+      expect(p.title).toBeTruthy();
+      expect(p.subtitle).toBeTruthy();
+      expect(p.sessions).toBeTruthy();
+      expect(p.description).toBeTruthy();
+      expect(p.url).toMatch(/^https:\/\//);
+      expect(p.Icon).toBeDefined();
+      expect(p.color).toBeTruthy();
+      expect(p.border).toBeTruthy();
+      expect(p.bg).toBeTruthy();
+    });
+  });
+});
+
+// ─── CONTACT_OPTIONS ─────────────────────────────────────────────────────────
+
+describe("CONTACT_OPTIONS (data/contact.ts)", () => {
+  it("has exactly 3 options", () => {
+    expect(CONTACT_OPTIONS).toHaveLength(3);
+  });
+
+  it("every option has required fields", () => {
+    CONTACT_OPTIONS.forEach((o) => {
+      expect(o.title).toBeTruthy();
+      expect(o.desc).toBeTruthy();
+      expect(o.action).toBeTruthy();
+      expect(o.href).toBeTruthy();
+      expect(o.icon).toBeDefined();
+    });
+  });
+});
+
+// ─── VALUES (mission) ────────────────────────────────────────────────────────
+
+describe("VALUES (data/mission.ts)", () => {
+  it("has exactly 5 values", () => {
+    expect(VALUES).toHaveLength(5);
+  });
+
+  it("every value has title, desc, icon, and style classes", () => {
+    VALUES.forEach((v) => {
+      expect(v.title).toBeTruthy();
+      expect(v.desc).toBeTruthy();
+      expect(v.icon).toBeDefined();
+      expect(v.color).toBeTruthy();
+      expect(v.bg).toBeTruthy();
+      expect(v.border).toBeTruthy();
+    });
+  });
+
+  it("no duplicate titles", () => {
+    const titles = VALUES.map((v) => v.title);
+    expect(new Set(titles).size).toBe(titles.length);
+  });
+});
+
+// ─── PARTNER ─────────────────────────────────────────────────────────────────
+
+describe("PARTNER data (data/partner.ts)", () => {
+  it("PARTNER_TYPES has exactly 4 entries", () => {
+    expect(PARTNER_TYPES).toHaveLength(4);
+  });
+
+  it("every PARTNER_TYPE has icon, color, title, desc", () => {
+    PARTNER_TYPES.forEach((p) => {
+      expect(p.icon).toBeDefined();
+      expect(p.color).toBeTruthy();
+      expect(p.title).toBeTruthy();
+      expect(p.desc).toBeTruthy();
+    });
+  });
+
+  it("BENEFITS is a non-empty array of strings", () => {
+    expect(BENEFITS.length).toBeGreaterThan(0);
+    BENEFITS.forEach((b) => expect(typeof b).toBe("string"));
+  });
+});
+
+// ─── DASHBOARD_NAV ───────────────────────────────────────────────────────────
+
+describe("DASHBOARD_NAV (data/dashboard.ts)", () => {
+  it("is a non-empty array", () => {
+    expect(DASHBOARD_NAV.length).toBeGreaterThan(0);
+  });
+
+  it("every item has href starting with / and a label", () => {
+    DASHBOARD_NAV.forEach((n) => {
+      expect(n.href).toMatch(/^\//);
+      expect(n.label).toBeTruthy();
+    });
+  });
+
+  it("includes /dashboard and /billing", () => {
+    const hrefs = DASHBOARD_NAV.map((n) => n.href);
+    expect(hrefs).toContain("/dashboard");
+    expect(hrefs).toContain("/billing");
   });
 });

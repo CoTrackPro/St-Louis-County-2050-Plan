@@ -1,9 +1,10 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
-const FROM    = process.env.SES_FROM_ADDRESS    ?? "CoTrackPro <admin@cotrackpro.com>";
-const KEY_ID  = process.env.SES_AWS_ACCESS_KEY_ID;
-const KEY_SEC = process.env.SES_AWS_SECRET_ACCESS_KEY;
-const REGION  = process.env.SES_REGION ?? "us-east-1";
+const FROM     = process.env.SES_FROM_ADDRESS    ?? "CoTrackPro <admin@cotrackpro.com>";
+const KEY_ID   = process.env.SES_AWS_ACCESS_KEY_ID;
+const KEY_SEC  = process.env.SES_AWS_SECRET_ACCESS_KEY;
+const REGION   = process.env.SES_REGION         ?? "us-east-1";
+const SITE_URL = process.env.NEXT_PUBLIC_URL     ?? "https://cotrackpro.com";
 
 // Returns null when SES credentials are not yet configured (dev / staging)
 function getSES(): SESClient | null {
@@ -52,7 +53,7 @@ export async function sendWelcomeEmail({ to, firstName, modules }: WelcomeEmailP
         ${moduleList}
       </div>
       <p style="margin-top:24px">
-        <a href="${process.env.NEXT_PUBLIC_URL}/dashboard"
+        <a href="${SITE_URL}/dashboard"
            style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block">
           Go to Dashboard →
         </a>
@@ -76,7 +77,7 @@ export async function sendAccessRevokedEmail({ to, firstName }: AccessRevokedPay
       <p>Your CoTrackPro subscription has been cancelled or expired.</p>
       <p>Your data is safe — resubscribe anytime to restore access.</p>
       <p>
-        <a href="${process.env.NEXT_PUBLIC_URL}/billing"
+        <a href="${SITE_URL}/billing"
            style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block">
           Resubscribe →
         </a>
@@ -103,7 +104,7 @@ export async function sendPaymentFailedEmail({ to, firstName, nextRetryDate }: P
       ${retryLine}
       <p>To avoid losing access, please update your payment method now:</p>
       <p>
-        <a href="${process.env.NEXT_PUBLIC_URL}/api/stripe/portal"
+        <a href="${SITE_URL}/api/stripe/portal"
            style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block">
           Update Payment Method →
         </a>

@@ -2,29 +2,22 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
-
-const NAV = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/bridges",   label: "Bridges" },
-  { href: "/legal",     label: "Legal" },
-  { href: "/mental",    label: "Mental" },
-  { href: "/billing",   label: "Billing" },
-];
+import { DASHBOARD_NAV } from "@/data/dashboard";
 
 export default function NavBar() {
   const pathname = usePathname();
   return (
-    <nav className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-      <Link href="/" className="text-xl font-bold text-indigo-900">CoTrackPro</Link>
+    <nav className="bg-[#0f172a] border-b border-white/10 px-6 py-3 flex items-center justify-between">
+      <Link href="/" className="text-xl font-bold text-white">CoTrackPro</Link>
       <div className="flex items-center gap-6">
-        {NAV.map((n) => (
+        {DASHBOARD_NAV.map((n) => (
           <Link
             key={n.href}
             href={n.href}
             className={`text-sm font-medium transition-colors ${
               pathname.startsWith(n.href)
-                ? "text-indigo-600"
-                : "text-gray-600 hover:text-indigo-600"
+                ? "text-[#38bdf8]"
+                : "text-gray-400 hover:text-[#38bdf8]"
             }`}
           >
             {n.label}

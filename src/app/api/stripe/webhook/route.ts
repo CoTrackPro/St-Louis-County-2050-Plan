@@ -5,6 +5,16 @@ import { sendWelcomeEmail, sendAccessRevokedEmail, sendPaymentFailedEmail } from
 import { captureError } from "@/lib/monitoring";
 import Stripe from "stripe";
 
+// Stripe SDK types that lag behind the API — extend conservatively
+type StripeInvoiceExtended = Stripe.Invoice & {
+  /** userId set in subscription metadata during checkout */
+  subscription_details?: {
+    metadata?: Record<string, string>;
+  };
+  /** Unix timestamp of next automatic payment retry attempt (overrides SDK's non-optional) */
+  next_payment_attempt?: number | null;
+};
+
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 
 export async function POST(req: NextRequest) {
@@ -50,7 +60,7 @@ export async function POST(req: NextRequest) {
         break;
       }
       case "invoice.payment_failed": {
-        const invoice = event.data.object as Stripe.Invoice;
+        const invoice = event.data.object as StripeInvoiceExtended;
         await handlePaymentFailed(invoice, clerk);
         break;
       }
@@ -82,10 +92,14 @@ async function handleCheckoutComplete(
     },
   });
 
-  const user = await clerk.users.getUser(userId);
-  const email = user.emailAddresses[0]?.emailAddress;
-  if (email) {
-    await sendWelcomeEmail({ to: email, firstName: user.firstName ?? "there", modules: moduleList });
+  try {
+    const user = await clerk.users.getUser(userId);
+    const email = user.emailAddresses[0]?.emailAddress;
+    if (email) {
+      await sendWelcomeEmail({ to: email, firstName: user.firstName ?? "there", modules: moduleList });
+    }
+  } catch (err) {
+    captureError(err, { context: "stripe-webhook-welcome-email", userId });
   }
 }
 
@@ -97,8 +111,18 @@ async function handleSubscriptionDeleted(
   if (!userId) return;
 
   await clerk.users.updateUserMetadata(userId, {
-    publicMetadata: { access: {}, subscriptionId: null },
+    publicMetadata: { access: {}, tier: null, subscriptionId: null },
   });
+
+  try {
+    const user = await clerk.users.getUser(userId);
+    const email = user.emailAddresses[0]?.emailAddress;
+    if (email) {
+      await sendAccessRevokedEmail({ to: email, firstName: user.firstName ?? "there" });
+    }
+  } catch (err) {
+    captureError(err, { context: "stripe-webhook-revoke-email", userId });
+  }
 }
 
 async function handleSubscriptionUpdated(
@@ -120,24 +144,27 @@ async function handleSubscriptionUpdated(
 }
 
 async function handlePaymentFailed(
-  invoice: Stripe.Invoice,
+  invoice: StripeInvoiceExtended,
   clerk: Awaited<ReturnType<typeof clerkClient>>
 ) {
   // invoice.subscription_details.metadata carries userId set during checkout
-  const metadata =
-    (invoice as Stripe.Invoice & { subscription_details?: { metadata?: Record<string, string> } })
-      .subscription_details?.metadata ?? {};
+  const metadata = invoice.subscription_details?.metadata ?? {};
 
   const userId = metadata.userId;
   if (!userId) return;
 
-  const user = await clerk.users.getUser(userId);
+  let user: Awaited<ReturnType<typeof clerk.users.getUser>>;
+  try {
+    user = await clerk.users.getUser(userId);
+  } catch (err) {
+    captureError(err, { context: "stripe-webhook-payment-failed-lookup", userId });
+    return;
+  }
   const email = user.emailAddresses[0]?.emailAddress;
   if (!email) return;
 
   // Format next retry date if Stripe provides it
-  const nextRetry = (invoice as Stripe.Invoice & { next_payment_attempt?: number | null })
-    .next_payment_attempt;
+  const nextRetry = invoice.next_payment_attempt;
   const nextRetryDate = nextRetry
     ? new Date(nextRetry * 1000).toLocaleDateString("en-US", {
         month: "long", day: "numeric", year: "numeric",
