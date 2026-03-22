@@ -16,7 +16,6 @@ describe("useClickOutside", () => {
 
     const el = document.createElement("div");
     document.body.appendChild(el);
-    // @ts-expect-error — manually attaching ref for testing
     ref.current = el;
 
     act(() => {
@@ -36,7 +35,6 @@ describe("useClickOutside", () => {
 
     const el = document.createElement("div");
     document.body.appendChild(el);
-    // @ts-expect-error
     ref.current = el;
 
     act(() => {

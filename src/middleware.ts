@@ -31,21 +31,23 @@ const ROUTE_TIER: Record<string, "parent" | "professional"> = {
 };
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionClaims } = await auth();
-  const { pathname } = req.nextUrl;
-
-  // Allow public routes through
+  // Allow public routes through immediately
   if (isPublicRoute(req)) return NextResponse.next();
 
-  // Redirect unauthenticated users to sign-in
+  // Resolve auth state — in v6 the auth() call also returns redirectToSignIn()
+  const { userId, sessionClaims, redirectToSignIn } = await auth();
+  const { pathname } = req.nextUrl;
+
+  // Unauthenticated: let Clerk build the proper redirect with return URL
   if (!userId) {
-    const signInUrl = new URL("/sign-in", req.url);
-    signInUrl.searchParams.set("redirect_url", pathname);
-    return NextResponse.redirect(signInUrl);
+    return redirectToSignIn({ returnBackUrl: req.url });
   }
 
-  // Check tier access via Clerk publicMetadata
-  const meta = sessionClaims?.metadata as Record<string, unknown> | undefined;
+  // Clerk JWT custom template should expose publicMetadata under "metadata".
+  // Falls back to "public_metadata" which some templates use instead.
+  const meta =
+    (sessionClaims?.metadata as Record<string, unknown> | undefined) ??
+    (sessionClaims?.public_metadata as Record<string, unknown> | undefined);
   const tier = meta?.tier as "parent" | "professional" | undefined;
 
   for (const [prefix, required] of Object.entries(ROUTE_TIER)) {
