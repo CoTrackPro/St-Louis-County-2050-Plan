@@ -104,7 +104,7 @@ export async function sendPaymentFailedEmail({ to, firstName, nextRetryDate }: P
       ${retryLine}
       <p>To avoid losing access, please update your payment method now:</p>
       <p>
-        <a href="${SITE_URL}/api/stripe/portal"
+        <a href="${SITE_URL}/billing"
            style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block">
           Update Payment Method →
         </a>

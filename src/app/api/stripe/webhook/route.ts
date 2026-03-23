@@ -182,12 +182,13 @@ async function handleSubscriptionUpdated(
   const { userId, plan, tier, modules } = sub.metadata ?? {};
   if (!userId || !modules) return;
 
-  const isActive   = sub.status === "active" || sub.status === "trialing";
-  const moduleList = modules.split(",").map((m) => m.trim());
-  const access     = isActive
-    ? Object.fromEntries(moduleList.map((m) => [m, true]))
-    : {};
-  const billing    = resolveBilling(plan);
+  // Revoke access only on terminal statuses — Stripe spells it "canceled" (one l).
+  // During the retry window (past_due) access stays on, consistent with the
+  // payment-failed email copy ("your access remains active during the retry period").
+  const accessRevoked = sub.status === "canceled" || sub.status === "unpaid";
+  const moduleList    = modules.split(",").map((m) => m.trim());
+  const access        = accessRevoked ? {} : Object.fromEntries(moduleList.map((m) => [m, true]));
+  const billing       = resolveBilling(plan);
 
   // 1. Update Clerk session claims
   await clerk.users.updateUserMetadata(userId, {
@@ -197,12 +198,12 @@ async function handleSubscriptionUpdated(
   // 2. Sync subscription state to DynamoDB
   try {
     await updateUserSubscription(userId, {
-      plan:               isActive ? (plan ?? null) : null,
-      tier:               isActive ? (tier ?? null) : null,
-      billing:            isActive ? billing : null,
+      plan:               accessRevoked ? null : (plan ?? null),
+      tier:               accessRevoked ? null : (tier ?? null),
+      billing:            accessRevoked ? null : billing,
       access,
       subscriptionStatus: sub.status,
-      subscriptionId:     isActive ? sub.id : null,
+      subscriptionId:     accessRevoked ? null : sub.id,
     });
   } catch (err) {
     captureError(err, { context: "stripe-webhook-dynamo-update", userId });
