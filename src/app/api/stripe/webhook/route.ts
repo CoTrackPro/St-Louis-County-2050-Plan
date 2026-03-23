@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { clerkClient } from "@clerk/nextjs/server";
 import { sendWelcomeEmail, sendAccessRevokedEmail, sendPaymentFailedEmail } from "@/lib/email";
+import { upsertUser, updateUserSubscription, revokeUserAccess } from "@/lib/dynamo";
 import { captureError } from "@/lib/monitoring";
 import Stripe from "stripe";
 
@@ -83,6 +84,7 @@ async function handleCheckoutComplete(
   const moduleList = modules.split(",");
   const access = Object.fromEntries(moduleList.map((m) => [m.trim(), true]));
 
+  // 1. Update Clerk session claims
   await clerk.users.updateUserMetadata(userId, {
     publicMetadata: {
       access,
@@ -92,9 +94,35 @@ async function handleCheckoutComplete(
     },
   });
 
+  // 2. Fetch full user record (needed for email + DynamoDB)
+  let user: Awaited<ReturnType<typeof clerk.users.getUser>>;
   try {
-    const user = await clerk.users.getUser(userId);
-    const email = user.emailAddresses[0]?.emailAddress;
+    user = await clerk.users.getUser(userId);
+  } catch (err) {
+    captureError(err, { context: "stripe-webhook-user-lookup", userId });
+    return;
+  }
+
+  const email = user.emailAddresses[0]?.emailAddress ?? null;
+
+  // 3. Upsert user into DynamoDB
+  try {
+    await upsertUser({
+      userId,
+      email:              email ?? "",
+      firstName:          user.firstName ?? null,
+      tier:               tier ?? null,
+      access,
+      stripeCustomerId:   session.customer as string ?? null,
+      subscriptionId:     session.subscription as string ?? null,
+      subscriptionStatus: "active",
+    });
+  } catch (err) {
+    captureError(err, { context: "stripe-webhook-dynamo-upsert", userId });
+  }
+
+  // 4. Send welcome email via SES
+  try {
     if (email) {
       await sendWelcomeEmail({ to: email, firstName: user.firstName ?? "there", modules: moduleList });
     }
@@ -110,10 +138,19 @@ async function handleSubscriptionDeleted(
   const { userId } = sub.metadata ?? {};
   if (!userId) return;
 
+  // 1. Clear Clerk session claims
   await clerk.users.updateUserMetadata(userId, {
     publicMetadata: { access: {}, tier: null, subscriptionId: null },
   });
 
+  // 2. Revoke in DynamoDB
+  try {
+    await revokeUserAccess(userId);
+  } catch (err) {
+    captureError(err, { context: "stripe-webhook-dynamo-revoke", userId });
+  }
+
+  // 3. Send cancellation email
   try {
     const user = await clerk.users.getUser(userId);
     const email = user.emailAddresses[0]?.emailAddress;
@@ -129,7 +166,7 @@ async function handleSubscriptionUpdated(
   sub: Stripe.Subscription,
   clerk: Awaited<ReturnType<typeof clerkClient>>
 ) {
-  const { userId, modules } = sub.metadata ?? {};
+  const { userId, modules, tier } = sub.metadata ?? {};
   if (!userId || !modules) return;
 
   const isActive = sub.status === "active" || sub.status === "trialing";
@@ -138,9 +175,22 @@ async function handleSubscriptionUpdated(
     ? Object.fromEntries(moduleList.map((m) => [m.trim(), true]))
     : {};
 
+  // 1. Update Clerk session claims
   await clerk.users.updateUserMetadata(userId, {
     publicMetadata: { access, subscriptionStatus: sub.status },
   });
+
+  // 2. Sync subscription state to DynamoDB
+  try {
+    await updateUserSubscription(userId, {
+      access,
+      tier:               isActive ? (tier ?? null) : null,
+      subscriptionStatus: sub.status,
+      subscriptionId:     isActive ? sub.id : null,
+    });
+  } catch (err) {
+    captureError(err, { context: "stripe-webhook-dynamo-update", userId });
+  }
 }
 
 async function handlePaymentFailed(

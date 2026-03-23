@@ -42,6 +42,12 @@ const serverSchema = z.object({
   SES_AWS_ACCESS_KEY_ID:     z.string().optional(),
   SES_AWS_SECRET_ACCESS_KEY: z.string().optional(),
 
+  // DynamoDB — optional dedicated credentials (falls back to SES creds then
+  // to the default AWS credential chain, e.g. an IAM role on EC2/ECS)
+  DYNAMODB_AWS_ACCESS_KEY_ID:     z.string().optional(),
+  DYNAMODB_AWS_SECRET_ACCESS_KEY: z.string().optional(),
+  DYNAMODB_REGION:                z.string().default("us-east-1"),
+
   // AI — optional (app runs in mock mode without them)
   // empty string treated as "not set" via .transform
   AI_DEFAULT_PROVIDER: z.enum(["anthropic", "openai", "gemini"]).default("anthropic"),
