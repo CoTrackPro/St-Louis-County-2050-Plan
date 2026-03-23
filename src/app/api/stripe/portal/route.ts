@@ -41,7 +41,6 @@ export async function POST() {
     return NextResponse.json({ url: session.url });
   } catch (err) {
     captureError(err, { context: "stripe-portal", userId });
-    const message = err instanceof Error ? err.message : "Failed to open billing portal";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to open billing portal. Please try again." }, { status: 500 });
   }
 }

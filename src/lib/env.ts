@@ -67,6 +67,9 @@ const serverSchema = z.object({
   // Infrastructure
   S3_ASSETS_BUCKET:      z.string().default("cotrackpro-assets"),
   DYNAMODB_USERS_TABLE:  z.string().default("cotrackpro-users"),
+  // Webhook idempotency table — stores processed Stripe event IDs with 72-hour TTL
+  // Required schema: PK eventId (String), TTL attribute: ttl (Number)
+  DYNAMODB_EVENTS_TABLE: z.string().default("cotrackpro-events"),
 
   // Highlight.io — optional (monitoring disabled if missing)
   HIGHLIGHT_PROJECT_ID: z.string().optional(),

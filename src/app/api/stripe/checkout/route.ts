@@ -51,8 +51,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
+    // Log the real error server-side; return a generic message to the client
+    // so internal Stripe API details are never exposed.
     captureError(err, { context: "stripe-checkout", plan });
-    const message = err instanceof Error ? err.message : "Failed to create checkout session";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create checkout session. Please try again." }, { status: 500 });
   }
 }

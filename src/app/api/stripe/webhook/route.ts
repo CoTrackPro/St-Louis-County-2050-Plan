@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { clerkClient } from "@clerk/nextjs/server";
 import { sendWelcomeEmail, sendAccessRevokedEmail, sendPaymentFailedEmail } from "@/lib/email";
-import { upsertUser, updateUserSubscription, revokeUserAccess } from "@/lib/dynamo";
+import { upsertUser, updateUserSubscription, revokeUserAccess, deduplicateEvent } from "@/lib/dynamo";
 import { captureError } from "@/lib/monitoring";
 import Stripe from "stripe";
 
@@ -12,7 +12,7 @@ type StripeInvoiceExtended = Stripe.Invoice & {
   subscription_details?: {
     metadata?: Record<string, string>;
   };
-  /** Unix timestamp of next automatic payment retry attempt (overrides SDK's non-optional) */
+  /** Unix timestamp of next automatic payment retry attempt */
   next_payment_attempt?: number | null;
 };
 
@@ -40,6 +40,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
+  // ── Idempotency ─────────────────────────────────────────────────────────────
+  // Stripe can deliver the same event more than once (retries, network issues).
+  // Deduplicate on event.id via a DynamoDB conditional write so every
+  // side-effect (Clerk update, DynamoDB write, email) runs exactly once.
+  let isNew: boolean;
+  try {
+    isNew = await deduplicateEvent(event.id);
+  } catch (err) {
+    captureError(err, { context: "stripe-webhook-dedup", eventId: event.id });
+    return NextResponse.json({ error: "Idempotency check failed" }, { status: 500 });
+  }
+  if (!isNew) {
+    // Already processed — return 200 so Stripe stops retrying
+    return NextResponse.json({ received: true, duplicate: true });
+  }
+
   const clerk = await clerkClient();
 
   try {
@@ -51,7 +67,7 @@ export async function POST(req: NextRequest) {
       }
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(sub, clerk);
+        await handleSubscriptionDeleted(sub, clerk, event.id);
         break;
       }
       case "customer.subscription.updated": {
@@ -64,9 +80,12 @@ export async function POST(req: NextRequest) {
         await handlePaymentFailed(invoice, clerk);
         break;
       }
+      default:
+        // Log unhandled event types so new Stripe features don't silently pass
+        console.log(`[stripe-webhook] unhandled event type: ${event.type} (id: ${event.id})`);
     }
   } catch (err) {
-    captureError(err, { context: "stripe-webhook", eventType: event.type });
+    captureError(err, { context: "stripe-webhook", eventType: event.type, eventId: event.id });
     return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
 
@@ -79,27 +98,23 @@ async function handleCheckoutComplete(
   session: Stripe.Checkout.Session,
   clerk: Awaited<ReturnType<typeof clerkClient>>
 ) {
-  // Metadata set by /api/stripe/checkout — plan, tier, modules, userId are all present
   const { userId, plan, tier, modules } = session.metadata ?? {};
   if (!userId || !modules) return;
 
   const moduleList = modules.split(",").map((m) => m.trim());
   const access     = Object.fromEntries(moduleList.map((m) => [m, true]));
+  const billing    = resolveBilling(plan);
 
-  // Derive billing cadence from plan key (parent_monthly → monthly, etc.)
-  const billing = resolveBilling(plan);
+  // Type-safe extraction — session.customer / subscription can be string | object | null
+  const stripeCustomerId = typeof session.customer     === "string" ? session.customer     : null;
+  const subscriptionId   = typeof session.subscription  === "string" ? session.subscription  : null;
 
-  // 1. Update Clerk session claims so the JWT picks up the new access on next request
+  // 1. Update Clerk session claims
   await clerk.users.updateUserMetadata(userId, {
-    publicMetadata: {
-      access,
-      tier:             tier ?? null,
-      stripeCustomerId: session.customer  as string,
-      subscriptionId:   session.subscription as string,
-    },
+    publicMetadata: { access, tier: tier ?? null, stripeCustomerId, subscriptionId },
   });
 
-  // 2. Fetch the full Clerk user record (identity fields for DynamoDB + email for SES)
+  // 2. Fetch full Clerk user (identity fields for DynamoDB + email for SES)
   let user: Awaited<ReturnType<typeof clerk.users.getUser>>;
   try {
     user = await clerk.users.getUser(userId);
@@ -121,8 +136,8 @@ async function handleCheckoutComplete(
       tier:               tier    ?? null,
       billing,
       access,
-      stripeCustomerId:   (session.customer    as string) ?? null,
-      subscriptionId:     (session.subscription as string) ?? null,
+      stripeCustomerId,
+      subscriptionId,
       subscriptionStatus: "active",
     });
   } catch (err) {
@@ -132,11 +147,7 @@ async function handleCheckoutComplete(
   // 4. Send welcome email via SES (non-fatal — DynamoDB write already committed)
   try {
     if (email) {
-      await sendWelcomeEmail({
-        to:        email,
-        firstName: user.firstName ?? "there",
-        modules:   moduleList,
-      });
+      await sendWelcomeEmail({ to: email, firstName: user.firstName ?? "there", modules: moduleList });
     }
   } catch (err) {
     captureError(err, { context: "stripe-webhook-welcome-email", userId });
@@ -145,10 +156,21 @@ async function handleCheckoutComplete(
 
 async function handleSubscriptionDeleted(
   sub: Stripe.Subscription,
-  clerk: Awaited<ReturnType<typeof clerkClient>>
+  clerk: Awaited<ReturnType<typeof clerkClient>>,
+  eventId: string
 ) {
   const { userId } = sub.metadata ?? {};
   if (!userId) return;
+
+  // Structured audit log — access revocations must be traceable
+  console.log(JSON.stringify({
+    event:          "access_revoked",
+    eventId,
+    userId,
+    subscriptionId: sub.id,
+    reason:         sub.cancellation_details?.reason ?? "unknown",
+    at:             new Date().toISOString(),
+  }));
 
   // 1. Clear Clerk access flags
   await clerk.users.updateUserMetadata(userId, {
@@ -162,10 +184,10 @@ async function handleSubscriptionDeleted(
     captureError(err, { context: "stripe-webhook-dynamo-revoke", userId });
   }
 
-  // 3. Send cancellation email via SES
+  // 3. Send cancellation email via SES (non-fatal)
   try {
     const user  = await clerk.users.getUser(userId);
-    const email = user.emailAddresses[0]?.emailAddress;
+    const email = user.emailAddresses[0]?.emailAddress ?? null;
     if (email) {
       await sendAccessRevokedEmail({ to: email, firstName: user.firstName ?? "there" });
     }
@@ -178,13 +200,12 @@ async function handleSubscriptionUpdated(
   sub: Stripe.Subscription,
   clerk: Awaited<ReturnType<typeof clerkClient>>
 ) {
-  // Both plan key and modules are stored in subscription metadata at checkout time
   const { userId, plan, tier, modules } = sub.metadata ?? {};
   if (!userId || !modules) return;
 
-  // Revoke access only on terminal statuses — Stripe spells it "canceled" (one l).
-  // During the retry window (past_due) access stays on, consistent with the
-  // payment-failed email copy ("your access remains active during the retry period").
+  // Revoke access only on terminal statuses.
+  // During Stripe's retry window (past_due) access stays on — consistent with
+  // the payment-failed email copy ("access remains active during the retry period").
   const accessRevoked = sub.status === "canceled" || sub.status === "unpaid";
   const moduleList    = modules.split(",").map((m) => m.trim());
   const access        = accessRevoked ? {} : Object.fromEntries(moduleList.map((m) => [m, true]));
@@ -214,7 +235,6 @@ async function handlePaymentFailed(
   invoice: StripeInvoiceExtended,
   clerk: Awaited<ReturnType<typeof clerkClient>>
 ) {
-  // invoice.subscription_details.metadata carries userId set during checkout
   const metadata = invoice.subscription_details?.metadata ?? {};
   const userId   = metadata.userId;
   if (!userId) return;
@@ -227,29 +247,23 @@ async function handlePaymentFailed(
     return;
   }
 
-  const email = user.emailAddresses[0]?.emailAddress;
+  const email = user.emailAddresses[0]?.emailAddress ?? null;
   if (!email) return;
 
-  const nextRetry     = invoice.next_payment_attempt;
-  const nextRetryDate = nextRetry
-    ? new Date(nextRetry * 1000).toLocaleDateString("en-US", {
-        month: "long", day: "numeric", year: "numeric",
-      })
-    : undefined;
+  const nextRetry = invoice.next_payment_attempt;
+  // Only surface the retry date if it's still in the future
+  const nextRetryDate =
+    nextRetry && nextRetry * 1000 > Date.now()
+      ? new Date(nextRetry * 1000).toLocaleDateString("en-US", {
+          month: "long", day: "numeric", year: "numeric",
+        })
+      : undefined;
 
-  await sendPaymentFailedEmail({
-    to:            email,
-    firstName:     user.firstName ?? "there",
-    nextRetryDate,
-  });
+  await sendPaymentFailedEmail({ to: email, firstName: user.firstName ?? "there", nextRetryDate });
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
-/**
- * Extracts the billing cadence from a plan key.
- * "parent_monthly" → "monthly", "professional_annual" → "annual", unknown → null
- */
 function resolveBilling(plan: string | undefined | null): "monthly" | "annual" | null {
   if (!plan) return null;
   if (plan.endsWith("_monthly")) return "monthly";

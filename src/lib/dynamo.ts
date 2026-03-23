@@ -30,8 +30,8 @@
  *   stripeCustomer-index — PK: stripeCustomerId  (for Stripe webhook fallback lookups)
  */
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBClient, ConditionalCheckFailedException } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, UpdateCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 
 // ─── Client ───────────────────────────────────────────────────────────────────
 
@@ -62,7 +62,54 @@ function getClient(): DynamoDBDocumentClient | null {
   return _client;
 }
 
-const TABLE = process.env.DYNAMODB_USERS_TABLE ?? "cotrackpro-users";
+const TABLE        = process.env.DYNAMODB_USERS_TABLE  ?? "cotrackpro-users";
+const EVENTS_TABLE = process.env.DYNAMODB_EVENTS_TABLE ?? "cotrackpro-events";
+
+// ─── Idempotency ──────────────────────────────────────────────────────────────
+
+/**
+ * Stripe webhooks can be delivered more than once (retries, network hiccups).
+ * This function uses a DynamoDB conditional write to ensure each Stripe event
+ * is processed exactly once:
+ *   - Returns true  → event is new; caller should process it
+ *   - Returns false → event was already processed; caller should skip it
+ *
+ * Items are stored with a 72-hour TTL (Stripe's maximum retry window) so the
+ * table stays small and doesn't need manual cleanup.
+ *
+ * Required DynamoDB table (cotrackpro-events):
+ *   Partition key: eventId (String)
+ *   TTL attribute: ttl     (Number — enable via DynamoDB console or IaC)
+ */
+export async function deduplicateEvent(eventId: string): Promise<boolean> {
+  const client = getClient();
+  if (!client) {
+    // Dev / CI — no credentials, allow all events through
+    return true;
+  }
+
+  // 72 hours in seconds from now
+  const ttl = Math.floor(Date.now() / 1000) + 72 * 60 * 60;
+
+  try {
+    await client.send(
+      new PutCommand({
+        TableName: EVENTS_TABLE,
+        Item: { eventId, ttl, processedAt: new Date().toISOString() },
+        // Fails if item already exists — prevents duplicate processing
+        ConditionExpression: "attribute_not_exists(eventId)",
+      })
+    );
+    return true; // New event — process it
+  } catch (err) {
+    if (err instanceof ConditionalCheckFailedException) {
+      return false; // Already processed — skip it
+    }
+    // Unexpected DynamoDB error — surface it so the webhook returns 500
+    // and Stripe will retry (idempotency table failure should not silently pass)
+    throw err;
+  }
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
