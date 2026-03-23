@@ -21,6 +21,8 @@ export default async function LibraryPage() {
   const meta  = sessionClaims?.metadata as Record<string, unknown> | undefined;
   const tier  = (meta?.tier as string | null | undefined) ?? null;
 
+  if (!tier || tier === "free") redirect("/billing?upgrade=parent");
+
   // Counts for the stats strip
   const byType = {
     slides: LIBRARY.filter((i) => i.type === "slides").length,
