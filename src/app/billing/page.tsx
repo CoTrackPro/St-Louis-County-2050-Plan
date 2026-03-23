@@ -19,6 +19,10 @@ function BillingContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),
       });
+      if (res.status === 401) {
+        window.location.href = "/sign-in";
+        return;
+      }
       const data = await res.json();
       if (!res.ok || !data.url) {
         setCheckoutError(data.error ?? "Something went wrong. Please try again.");
