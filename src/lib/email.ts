@@ -1,38 +1,42 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
-const FROM     = process.env.SES_FROM_ADDRESS    ?? "CoTrackPro <admin@cotrackpro.com>";
-const KEY_ID   = process.env.SES_AWS_ACCESS_KEY_ID;
-const KEY_SEC  = process.env.SES_AWS_SECRET_ACCESS_KEY;
-const REGION   = process.env.SES_REGION         ?? "us-east-1";
-const SITE_URL = process.env.NEXT_PUBLIC_URL     ?? "https://cotrackpro.com";
+const FROM     = process.env.SES_FROM_ADDRESS ?? "CoTrackPro <admin@cotrackpro.com>";
+const REGION   = process.env.SES_REGION       ?? "us-east-1";
+const SITE_URL = process.env.NEXT_PUBLIC_URL  ?? "https://cotrackpro.com";
 
-// Returns null when SES credentials are not yet configured (dev / staging)
+// Lazy singleton — created once on first use, reused across all email calls.
+// Returns null when SES credentials are absent (dev / CI) so emails log to console.
+let _ses: SESClient | null | undefined;
+
 function getSES(): SESClient | null {
-  if (!KEY_ID || !KEY_SEC) return null;
-  return new SESClient({
-    region: REGION,
-    credentials: { accessKeyId: KEY_ID, secretAccessKey: KEY_SEC },
-  });
+  if (_ses !== undefined) return _ses;
+  const keyId  = process.env.SES_AWS_ACCESS_KEY_ID;
+  const secret = process.env.SES_AWS_SECRET_ACCESS_KEY;
+  _ses = keyId && secret
+    ? new SESClient({ region: REGION, credentials: { accessKeyId: keyId, secretAccessKey: secret } })
+    : null;
+  return _ses;
 }
 
 async function send(to: string, subject: string, html: string) {
   const ses = getSES();
   if (!ses) {
-    // Graceful no-op in dev — log so the email content is still visible
     console.log(`[email:dev] TO=${to} SUBJECT=${subject}`);
     return;
   }
   return ses.send(
     new SendEmailCommand({
-      Source: FROM,
+      Source:      FROM,
       Destination: { ToAddresses: [to] },
       Message: {
-        Subject: { Data: subject, Charset: "UTF-8" },
+        Subject: { Data: subject,  Charset: "UTF-8" },
         Body:    { Html: { Data: html, Charset: "UTF-8" } },
       },
     })
   );
 }
+
+// ─── Templates ────────────────────────────────────────────────────────────────
 
 interface WelcomeEmailPayload {
   to: string;

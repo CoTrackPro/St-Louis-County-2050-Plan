@@ -17,7 +17,7 @@ export default async function MentalPage() {
     | Record<string, boolean>
     | undefined;
 
-  if (!access?.mental) redirect("/billing?module=mental");
+  if (!access?.mental) redirect("/billing?upgrade=parent");
 
   return (
     <>

@@ -4,12 +4,14 @@ export type DashboardModule = {
   icon: string;
   label: string;
   desc: string;
+  /** Minimum tier required — mirrors ROUTE_TIER in middleware.ts */
+  requiredTier: "parent" | "professional";
 };
 
 export const MODULES: DashboardModule[] = [
-  { key: "bridges", href: "/bridges", icon: "🌉", label: "Bridges", desc: "Co-parenting docs & communication logs" },
-  { key: "legal",   href: "/legal",   icon: "⚖️",  label: "Legal",   desc: "Attorney intake, checklists, drafting" },
-  { key: "mental",  href: "/mental",  icon: "🧠",  label: "Mental",  desc: "Wellness plans & safety documentation" },
+  { key: "bridges", href: "/bridges", icon: "🌉", label: "Bridges", desc: "Co-parenting docs & communication logs", requiredTier: "parent"       },
+  { key: "legal",   href: "/legal",   icon: "⚖️",  label: "Legal",   desc: "Attorney intake, checklists, drafting",  requiredTier: "professional" },
+  { key: "mental",  href: "/mental",  icon: "🧠",  label: "Mental",  desc: "Wellness plans & safety documentation",  requiredTier: "parent"       },
 ];
 
 export type DashboardNavItem = {

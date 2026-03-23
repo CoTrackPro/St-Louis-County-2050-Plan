@@ -17,7 +17,7 @@ export default async function BridgesPage() {
     | Record<string, boolean>
     | undefined;
 
-  if (!access?.bridges) redirect("/billing?module=bridges");
+  if (!access?.bridges) redirect("/billing?upgrade=parent");
 
   return (
     <>

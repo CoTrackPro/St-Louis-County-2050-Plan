@@ -17,7 +17,7 @@ export default async function LegalPage() {
     | Record<string, boolean>
     | undefined;
 
-  if (!access?.legal) redirect("/billing?module=legal");
+  if (!access?.legal) redirect("/billing?upgrade=professional");
 
   return (
     <>

@@ -35,25 +35,31 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 // ─── Client ───────────────────────────────────────────────────────────────────
 
+// Lazy singleton — created once on first use, reused across all DynamoDB calls.
+// undefined = not yet initialised; null = no credentials (dev no-op mode).
+let _client: DynamoDBDocumentClient | null | undefined;
+
 function getClient(): DynamoDBDocumentClient | null {
+  if (_client !== undefined) return _client;
+
   const keyId  = process.env.DYNAMODB_AWS_ACCESS_KEY_ID  ?? process.env.SES_AWS_ACCESS_KEY_ID;
   const secret = process.env.DYNAMODB_AWS_SECRET_ACCESS_KEY ?? process.env.SES_AWS_SECRET_ACCESS_KEY;
   const region = process.env.DYNAMODB_REGION ?? process.env.SES_REGION ?? "us-east-1";
 
   const base = new DynamoDBClient({
     region,
-    // If no explicit credentials are provided the SDK falls through to the
-    // default credential chain: env vars → ~/.aws/credentials → IAM role.
-    // This is safe and recommended for production on EC2 / ECS / Lambda.
+    // Without explicit credentials the SDK uses the default credential chain:
+    // env vars → ~/.aws/credentials → EC2/ECS/Lambda IAM role.
     ...(keyId && secret
       ? { credentials: { accessKeyId: keyId, secretAccessKey: secret } }
       : {}),
   });
 
-  return DynamoDBDocumentClient.from(base, {
+  _client = DynamoDBDocumentClient.from(base, {
     marshallOptions:   { removeUndefinedValues: true },
     unmarshallOptions: { wrapNumbers: false },
   });
+  return _client;
 }
 
 const TABLE = process.env.DYNAMODB_USERS_TABLE ?? "cotrackpro-users";

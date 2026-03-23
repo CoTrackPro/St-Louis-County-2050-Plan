@@ -8,9 +8,13 @@ export default async function DashboardPage() {
   const { userId, sessionClaims } = await auth();
   if (!userId) redirect("/sign-in");
   const user = await currentUser();
-  const access = (sessionClaims?.metadata as Record<string, unknown>)?.access as
-    | Record<string, boolean>
-    | undefined;
+  // Mirror the same fallback used in middleware.ts — some Clerk JWT templates
+  // expose publicMetadata under "public_metadata" instead of "metadata".
+  const meta = (
+    (sessionClaims?.metadata as Record<string, unknown> | undefined) ??
+    (sessionClaims?.public_metadata as Record<string, unknown> | undefined)
+  );
+  const access = meta?.access as Record<string, boolean> | undefined;
 
   return (
     <>
@@ -45,7 +49,7 @@ export default async function DashboardPage() {
                   </Link>
                 ) : (
                   <Link
-                    href={`/billing?module=${m.key}`}
+                    href={`/billing?upgrade=${m.requiredTier}`}
                     className="text-sm font-medium text-gray-500 hover:text-[#38bdf8] transition-colors"
                   >
                     Upgrade to unlock →
