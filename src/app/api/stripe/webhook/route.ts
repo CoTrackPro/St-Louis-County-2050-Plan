@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig  = req.headers.get("stripe-signature");
 
-  // Reject immediately if Stripe signature header is absent
   if (!sig) {
     return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 });
   }
@@ -74,27 +73,33 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
+// ─── Handlers ─────────────────────────────────────────────────────────────────
+
 async function handleCheckoutComplete(
   session: Stripe.Checkout.Session,
   clerk: Awaited<ReturnType<typeof clerkClient>>
 ) {
-  const { userId, modules, tier } = session.metadata ?? {};
+  // Metadata set by /api/stripe/checkout — plan, tier, modules, userId are all present
+  const { userId, plan, tier, modules } = session.metadata ?? {};
   if (!userId || !modules) return;
 
-  const moduleList = modules.split(",");
-  const access = Object.fromEntries(moduleList.map((m) => [m.trim(), true]));
+  const moduleList = modules.split(",").map((m) => m.trim());
+  const access     = Object.fromEntries(moduleList.map((m) => [m, true]));
 
-  // 1. Update Clerk session claims
+  // Derive billing cadence from plan key (parent_monthly → monthly, etc.)
+  const billing = resolveBilling(plan);
+
+  // 1. Update Clerk session claims so the JWT picks up the new access on next request
   await clerk.users.updateUserMetadata(userId, {
     publicMetadata: {
       access,
-      tier: tier ?? null,
-      stripeCustomerId: session.customer as string,
-      subscriptionId: session.subscription as string,
+      tier:             tier ?? null,
+      stripeCustomerId: session.customer  as string,
+      subscriptionId:   session.subscription as string,
     },
   });
 
-  // 2. Fetch full user record (needed for email + DynamoDB)
+  // 2. Fetch the full Clerk user record (identity fields for DynamoDB + email for SES)
   let user: Awaited<ReturnType<typeof clerk.users.getUser>>;
   try {
     user = await clerk.users.getUser(userId);
@@ -105,26 +110,33 @@ async function handleCheckoutComplete(
 
   const email = user.emailAddresses[0]?.emailAddress ?? null;
 
-  // 3. Upsert user into DynamoDB
+  // 3. Upsert full user record into DynamoDB (createdAt preserved on re-subscription)
   try {
     await upsertUser({
       userId,
       email:              email ?? "",
       firstName:          user.firstName ?? null,
-      tier:               tier ?? null,
+      lastName:           user.lastName  ?? null,
+      plan:               plan    ?? null,
+      tier:               tier    ?? null,
+      billing,
       access,
-      stripeCustomerId:   session.customer as string ?? null,
-      subscriptionId:     session.subscription as string ?? null,
+      stripeCustomerId:   (session.customer    as string) ?? null,
+      subscriptionId:     (session.subscription as string) ?? null,
       subscriptionStatus: "active",
     });
   } catch (err) {
     captureError(err, { context: "stripe-webhook-dynamo-upsert", userId });
   }
 
-  // 4. Send welcome email via SES
+  // 4. Send welcome email via SES (non-fatal — DynamoDB write already committed)
   try {
     if (email) {
-      await sendWelcomeEmail({ to: email, firstName: user.firstName ?? "there", modules: moduleList });
+      await sendWelcomeEmail({
+        to:        email,
+        firstName: user.firstName ?? "there",
+        modules:   moduleList,
+      });
     }
   } catch (err) {
     captureError(err, { context: "stripe-webhook-welcome-email", userId });
@@ -138,21 +150,21 @@ async function handleSubscriptionDeleted(
   const { userId } = sub.metadata ?? {};
   if (!userId) return;
 
-  // 1. Clear Clerk session claims
+  // 1. Clear Clerk access flags
   await clerk.users.updateUserMetadata(userId, {
     publicMetadata: { access: {}, tier: null, subscriptionId: null },
   });
 
-  // 2. Revoke in DynamoDB
+  // 2. Revoke in DynamoDB — clears plan, tier, billing, access, subscriptionId
   try {
     await revokeUserAccess(userId);
   } catch (err) {
     captureError(err, { context: "stripe-webhook-dynamo-revoke", userId });
   }
 
-  // 3. Send cancellation email
+  // 3. Send cancellation email via SES
   try {
-    const user = await clerk.users.getUser(userId);
+    const user  = await clerk.users.getUser(userId);
     const email = user.emailAddresses[0]?.emailAddress;
     if (email) {
       await sendAccessRevokedEmail({ to: email, firstName: user.firstName ?? "there" });
@@ -166,14 +178,16 @@ async function handleSubscriptionUpdated(
   sub: Stripe.Subscription,
   clerk: Awaited<ReturnType<typeof clerkClient>>
 ) {
-  const { userId, modules, tier } = sub.metadata ?? {};
+  // Both plan key and modules are stored in subscription metadata at checkout time
+  const { userId, plan, tier, modules } = sub.metadata ?? {};
   if (!userId || !modules) return;
 
-  const isActive = sub.status === "active" || sub.status === "trialing";
-  const moduleList = modules.split(",");
-  const access = isActive
-    ? Object.fromEntries(moduleList.map((m) => [m.trim(), true]))
+  const isActive   = sub.status === "active" || sub.status === "trialing";
+  const moduleList = modules.split(",").map((m) => m.trim());
+  const access     = isActive
+    ? Object.fromEntries(moduleList.map((m) => [m, true]))
     : {};
+  const billing    = resolveBilling(plan);
 
   // 1. Update Clerk session claims
   await clerk.users.updateUserMetadata(userId, {
@@ -183,8 +197,10 @@ async function handleSubscriptionUpdated(
   // 2. Sync subscription state to DynamoDB
   try {
     await updateUserSubscription(userId, {
-      access,
+      plan:               isActive ? (plan ?? null) : null,
       tier:               isActive ? (tier ?? null) : null,
+      billing:            isActive ? billing : null,
+      access,
       subscriptionStatus: sub.status,
       subscriptionId:     isActive ? sub.id : null,
     });
@@ -199,8 +215,7 @@ async function handlePaymentFailed(
 ) {
   // invoice.subscription_details.metadata carries userId set during checkout
   const metadata = invoice.subscription_details?.metadata ?? {};
-
-  const userId = metadata.userId;
+  const userId   = metadata.userId;
   if (!userId) return;
 
   let user: Awaited<ReturnType<typeof clerk.users.getUser>>;
@@ -210,11 +225,11 @@ async function handlePaymentFailed(
     captureError(err, { context: "stripe-webhook-payment-failed-lookup", userId });
     return;
   }
+
   const email = user.emailAddresses[0]?.emailAddress;
   if (!email) return;
 
-  // Format next retry date if Stripe provides it
-  const nextRetry = invoice.next_payment_attempt;
+  const nextRetry     = invoice.next_payment_attempt;
   const nextRetryDate = nextRetry
     ? new Date(nextRetry * 1000).toLocaleDateString("en-US", {
         month: "long", day: "numeric", year: "numeric",
@@ -226,4 +241,17 @@ async function handlePaymentFailed(
     firstName:     user.firstName ?? "there",
     nextRetryDate,
   });
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+
+/**
+ * Extracts the billing cadence from a plan key.
+ * "parent_monthly" → "monthly", "professional_annual" → "annual", unknown → null
+ */
+function resolveBilling(plan: string | undefined | null): "monthly" | "annual" | null {
+  if (!plan) return null;
+  if (plan.endsWith("_monthly")) return "monthly";
+  if (plan.endsWith("_annual"))  return "annual";
+  return null;
 }

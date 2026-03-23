@@ -39,6 +39,7 @@ const serverSchema = z.object({
 
   // SES — credentials optional (email logs to console in dev if missing)
   SES_FROM_ADDRESS:          z.string().default("CoTrackPro <admin@cotrackpro.com>"),
+  SES_REGION:                z.string().default("us-east-1"),
   SES_AWS_ACCESS_KEY_ID:     z.string().optional(),
   SES_AWS_SECRET_ACCESS_KEY: z.string().optional(),
 
