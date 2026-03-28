@@ -21,6 +21,7 @@ from urllib.request import Request, urlopen
 # Census ACS API Client
 # ============================================================
 
+
 class CensusClient:
     """US Census American Community Survey API client.
 
@@ -34,17 +35,28 @@ class CensusClient:
     COMMON_TABLES = {
         "population": {"table": "B01001", "variables": ["B01001_001E"], "labels": ["Total Population"]},
         "median_income": {"table": "B19013", "variables": ["B19013_001E"], "labels": ["Median Household Income"]},
-        "race": {"table": "B02001", "variables": ["B02001_001E", "B02001_002E", "B02001_003E"], "labels": ["Total", "White", "Black"]},
+        "race": {
+            "table": "B02001",
+            "variables": ["B02001_001E", "B02001_002E", "B02001_003E"],
+            "labels": ["Total", "White", "Black"],
+        },
         "age_65plus": {"table": "B01001", "variables": ["B01001_001E"], "labels": ["Total Population"]},
-        "housing_tenure": {"table": "B25003", "variables": ["B25003_001E", "B25003_002E", "B25003_003E"], "labels": ["Total", "Owner", "Renter"]},
-        "poverty": {"table": "B17001", "variables": ["B17001_001E", "B17001_002E"], "labels": ["Total", "Below Poverty"]},
+        "housing_tenure": {
+            "table": "B25003",
+            "variables": ["B25003_001E", "B25003_002E", "B25003_003E"],
+            "labels": ["Total", "Owner", "Renter"],
+        },
+        "poverty": {
+            "table": "B17001",
+            "variables": ["B17001_001E", "B17001_002E"],
+            "labels": ["Total", "Below Poverty"],
+        },
     }
 
     def __init__(self, api_key: str = None):
         self.api_key = api_key
 
-    def get_county_data(self, variables: list[str], year: int = 2023,
-                        state: str = None, county: str = None) -> dict:
+    def get_county_data(self, variables: list[str], year: int = 2023, state: str = None, county: str = None) -> dict:
         """Fetch ACS 5-year data for a county."""
         state = state or self.STL_COUNTY_FIPS["state"]
         county = county or self.STL_COUNTY_FIPS["county"]
@@ -94,6 +106,7 @@ class CensusClient:
 # Socrata Open Data API Client (County Open Data Portal)
 # ============================================================
 
+
 class SocrataClient:
     """Socrata Open Data API (SODA) client for county data portal.
 
@@ -108,8 +121,9 @@ class SocrataClient:
         self.base = f"https://{domain}/resource"
         self.app_token = app_token
 
-    def query(self, dataset_id: str, select: str = None, where: str = None,
-              order: str = None, limit: int = 1000) -> list[dict]:
+    def query(
+        self, dataset_id: str, select: str = None, where: str = None, order: str = None, limit: int = 1000
+    ) -> list[dict]:
         """Query a Socrata dataset using SoQL."""
         params = {"$limit": str(limit)}
         if select:
@@ -155,6 +169,7 @@ class SocrataClient:
 # FBI Crime Data Explorer API Client
 # ============================================================
 
+
 class UCRClient:
     """FBI Uniform Crime Reporting (UCR) API client.
 
@@ -167,8 +182,9 @@ class UCRClient:
     # St. Louis County PD ORI (agency identifier) — verify actual ORI
     STL_COUNTY_ORI = "MO0950000"
 
-    def get_agency_crime(self, ori: str = None, offense: str = "violent-crime",
-                         start_year: int = 2018, end_year: int = 2023) -> dict:
+    def get_agency_crime(
+        self, ori: str = None, offense: str = "violent-crime", start_year: int = 2018, end_year: int = 2023
+    ) -> dict:
         """Fetch crime data for an agency by ORI code."""
         ori = ori or self.STL_COUNTY_ORI
         url = f"{self.BASE}/summarized/agency/{ori}/{offense}?from={start_year}&to={end_year}"
@@ -184,6 +200,7 @@ class UCRClient:
 # ============================================================
 # Qless API Pattern (Template — Requires County Credentials)
 # ============================================================
+
 
 class QlessClient:
     """Qless virtual queue API client pattern.
@@ -261,6 +278,7 @@ class QlessClient:
 # Connection Tester
 # ============================================================
 
+
 def test_connections():
     """Test all available API connections."""
     results = []
@@ -294,7 +312,7 @@ def test_connections():
     print("Qless API: Template only — requires county credentials")
     results.append(("Qless", False, "Template — needs county API key"))
 
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     connected = sum(1 for _, ok, _ in results if ok)
     print(f"Connected: {connected}/{len(results)}")
 
@@ -303,12 +321,13 @@ def test_connections():
 
 def main():
     parser = argparse.ArgumentParser(description="API integration clients for county data")
-    parser.add_argument("command", choices=["census", "socrata", "ucr", "qless", "test"],
-                        help="Which API to query")
+    parser.add_argument("command", choices=["census", "socrata", "ucr", "qless", "test"], help="Which API to query")
     parser.add_argument("--county", default="29189", help="FIPS code (default: 29189 STL County)")
     parser.add_argument("--table", default="B01001", help="Census table")
     parser.add_argument("--dataset", help="Socrata dataset ID")
-    parser.add_argument("--topic", help="Census common topic (population, median_income, race, poverty, housing_tenure)")
+    parser.add_argument(
+        "--topic", help="Census common topic (population, median_income, race, poverty, housing_tenure)"
+    )
     parser.add_argument("--output", "-o", help="Output file")
     args = parser.parse_args()
 

@@ -167,14 +167,16 @@ def score_journey(journey: dict) -> dict:
     for tp in touchpoints:
         for pattern_id, pattern in HANDOFF_FAILURE_PATTERNS.items():
             if pattern["detect"](tp):
-                failed_handoffs.append({
-                    "pattern": pattern_id,
-                    "pattern_name": pattern["name"],
-                    "description": pattern["description"],
-                    "step": tp.get("step"),
-                    "department": tp.get("department"),
-                    "action": tp.get("action", ""),
-                })
+                failed_handoffs.append(
+                    {
+                        "pattern": pattern_id,
+                        "pattern_name": pattern["name"],
+                        "description": pattern["description"],
+                        "step": tp.get("step"),
+                        "department": tp.get("department"),
+                        "action": tp.get("action", ""),
+                    }
+                )
 
     # Handoff gaps (time between last touchpoint in dept A and first in dept B)
     handoff_gaps = []
@@ -186,12 +188,14 @@ def score_journey(journey: dict) -> dict:
                 d_prev = datetime.strptime(prev.get("date", ""), "%Y-%m-%d")
                 d_curr = datetime.strptime(curr.get("date", ""), "%Y-%m-%d")
                 gap = (d_curr - d_prev).days
-                handoff_gaps.append({
-                    "from_dept": prev.get("department"),
-                    "to_dept": curr.get("department"),
-                    "gap_days": gap,
-                    "is_excessive": gap > 7,
-                })
+                handoff_gaps.append(
+                    {
+                        "from_dept": prev.get("department"),
+                        "to_dept": curr.get("department"),
+                        "gap_days": gap,
+                        "is_excessive": gap > 7,
+                    }
+                )
             except ValueError:
                 pass
 
@@ -214,8 +218,12 @@ def score_journey(journey: dict) -> dict:
             touchpoint_status = "🟡"
 
     # Overall journey score (simple composite)
-    days_score = min(100, round((target_days / total_days) * 100, 1)) if total_days and target_days and total_days > 0 else None
-    tp_score = min(100, round((target_tp / total_touchpoints) * 100, 1)) if target_tp and total_touchpoints > 0 else None
+    days_score = (
+        min(100, round((target_days / total_days) * 100, 1)) if total_days and target_days and total_days > 0 else None
+    )
+    tp_score = (
+        min(100, round((target_tp / total_touchpoints) * 100, 1)) if target_tp and total_touchpoints > 0 else None
+    )
     handoff_score = round(100 * (1 - len(failed_handoffs) / max(handoff_count, 1)), 1) if handoff_count > 0 else 100
 
     scores = [s for s in [days_score, tp_score, handoff_score] if s is not None]
@@ -240,7 +248,9 @@ def score_journey(journey: dict) -> dict:
             "avg_wait_minutes": avg_wait,
             "handoff_count": handoff_count,
             "failed_handoff_count": len(failed_handoffs),
-            "handoff_success_rate": round(100 * (1 - len(failed_handoffs) / max(handoff_count, 1)), 1) if handoff_count else 100,
+            "handoff_success_rate": round(100 * (1 - len(failed_handoffs) / max(handoff_count, 1)), 1)
+            if handoff_count
+            else 100,
         },
         "scores": {
             "days_score": days_score,
@@ -310,12 +320,24 @@ def generate_report(scored: list[dict], aggregate: dict) -> str:
 
     avg_days = aggregate.get("avg_days")
     tgt_days = aggregate.get("target_days")
-    days_status = "🟢" if avg_days and tgt_days and avg_days <= tgt_days else "🟡" if avg_days and tgt_days and avg_days <= tgt_days * 1.5 else "🔴"
+    days_status = (
+        "🟢"
+        if avg_days and tgt_days and avg_days <= tgt_days
+        else "🟡"
+        if avg_days and tgt_days and avg_days <= tgt_days * 1.5
+        else "🔴"
+    )
     lines.append(f"| Avg total days | {avg_days or 'N/A'} | {tgt_days or 'N/A'} | {days_status} |")
 
     avg_tp = aggregate.get("avg_touchpoints")
     tgt_tp = aggregate.get("target_touchpoints")
-    tp_status = "🟢" if avg_tp and tgt_tp and avg_tp <= tgt_tp else "🟡" if avg_tp and tgt_tp and avg_tp <= tgt_tp * 1.5 else "🔴"
+    tp_status = (
+        "🟢"
+        if avg_tp and tgt_tp and avg_tp <= tgt_tp
+        else "🟡"
+        if avg_tp and tgt_tp and avg_tp <= tgt_tp * 1.5
+        else "🔴"
+    )
     lines.append(f"| Avg touchpoints | {avg_tp or 'N/A'} | {tgt_tp or 'N/A'} | {tp_status} |")
 
     drop = aggregate.get("drop_off_rate", 0)
@@ -323,7 +345,9 @@ def generate_report(scored: list[dict], aggregate: dict) -> str:
     drop_status = "🟢" if drop <= tgt_drop else "🟡" if drop <= tgt_drop * 1.5 else "🔴"
     lines.append(f"| Drop-off rate | {drop}% | {tgt_drop}% | {drop_status} |")
 
-    lines.append(f"| Composite score | {aggregate.get('avg_composite_score', 'N/A')}% | 90%+ | {'🟢' if (aggregate.get('avg_composite_score') or 0) >= 90 else '🟡' if (aggregate.get('avg_composite_score') or 0) >= 75 else '🔴'} |")
+    lines.append(
+        f"| Composite score | {aggregate.get('avg_composite_score', 'N/A')}% | 90%+ | {'🟢' if (aggregate.get('avg_composite_score') or 0) >= 90 else '🟡' if (aggregate.get('avg_composite_score') or 0) >= 75 else '🔴'} |"
+    )
     lines.append("")
 
     # Outcomes
@@ -355,7 +379,9 @@ def generate_report(scored: list[dict], aggregate: dict) -> str:
     for s in scored[:5]:
         lines.append(f"### {s.get('journey_id', '?')} — {s.get('outcome', '?')}")
         m = s.get("metrics", {})
-        lines.append(f"- Days: {m.get('total_days', '?')} | Touchpoints: {m.get('total_touchpoints', '?')} | Departments: {', '.join(m.get('departments_involved', []))}")
+        lines.append(
+            f"- Days: {m.get('total_days', '?')} | Touchpoints: {m.get('total_touchpoints', '?')} | Departments: {', '.join(m.get('departments_involved', []))}"
+        )
         lines.append(f"- Composite score: {s.get('scores', {}).get('composite', '?')}%")
         if s.get("failed_handoffs"):
             lines.append(f"- ⚠️ Handoff failures: {', '.join(f['pattern_name'] for f in s['failed_handoffs'])}")

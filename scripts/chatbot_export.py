@@ -20,12 +20,19 @@ KB = [
     {
         "intent": "pay_property_tax",
         "category": "payments",
-        "patterns": ["pay property tax", "pay my taxes", "tax payment", "pay tax bill", "where to pay taxes", "how to pay property tax"],
+        "patterns": [
+            "pay property tax",
+            "pay my taxes",
+            "tax payment",
+            "pay tax bill",
+            "where to pay taxes",
+            "how to pay property tax",
+        ],
         "response": "You can pay your property tax online at stlouiscountymo.gov/payments — it takes about 2 minutes and you'll get instant confirmation. You can also pay by mail or in person at Clayton, NW Crossings, or South County (Mon-Thu 8am-3:30pm).",
         "links": [{"label": "Pay Online", "url": "https://stlouiscountymo.gov/payments"}],
         "follow_ups": ["When are taxes due?", "Can I pay in installments?", "Where do I find my parcel number?"],
         "escalation": None,
-        "department": "Revenue"
+        "department": "Revenue",
     },
     {
         "intent": "tax_due_date",
@@ -35,27 +42,41 @@ KB = [
         "links": [],
         "follow_ups": ["How do I pay online?", "What if I can't pay on time?"],
         "escalation": None,
-        "department": "Revenue"
+        "department": "Revenue",
     },
     {
         "intent": "senior_tax_freeze",
         "category": "benefits",
-        "patterns": ["senior tax freeze", "tax freeze", "property tax freeze", "senior property tax", "am I eligible for tax freeze", "over 62 tax"],
+        "patterns": [
+            "senior tax freeze",
+            "tax freeze",
+            "property tax freeze",
+            "senior property tax",
+            "am I eligible for tax freeze",
+            "over 62 tax",
+        ],
         "response": "The Senior Property Tax Freeze may be available if you're 62 or older, own and live in your home, and meet the income threshold. Applications open annually. Would you like to check your eligibility?",
         "links": [{"label": "Application Info", "url": "https://stlouiscountymo.gov/senior-tax-freeze"}],
         "follow_ups": ["What's the income limit?", "Where do I apply?", "What documents do I need?"],
         "escalation": {"trigger": "eligibility_question", "to": "Revenue", "phone": "314-615-5000"},
-        "department": "Revenue"
+        "department": "Revenue",
     },
     {
         "intent": "need_permit",
         "category": "permits",
-        "patterns": ["do I need a permit", "building permit", "permit required", "renovation permit", "deck permit", "fence permit"],
+        "patterns": [
+            "do I need a permit",
+            "building permit",
+            "permit required",
+            "renovation permit",
+            "deck permit",
+            "fence permit",
+        ],
         "response": "Permits are required for structural work (additions, decks, basements), electrical, plumbing, and HVAC. Interior cosmetic work (paint, flooring, cabinets) generally doesn't need a permit. The first step is always checking your zoning. Would you like to know more about a specific project?",
         "links": [{"label": "Permit Portal", "url": "https://stlouiscountymo.gov/permits"}],
         "follow_ups": ["How do I check zoning?", "How long does a permit take?", "How much does it cost?"],
         "escalation": {"trigger": "complex_project", "to": "Permits", "phone": "314-615-5000"},
-        "department": "Permits & Licensing"
+        "department": "Permits & Licensing",
     },
     {
         "intent": "permit_status",
@@ -65,7 +86,7 @@ KB = [
         "links": [{"label": "Check Status", "url": "https://stlouiscountymo.gov/permits"}],
         "follow_ups": ["Why was my permit denied?", "How do I resubmit?"],
         "escalation": {"trigger": "denied_or_delayed", "to": "Permits", "phone": "314-615-5000"},
-        "department": "Permits & Licensing"
+        "department": "Permits & Licensing",
     },
     {
         "intent": "birth_certificate",
@@ -75,7 +96,7 @@ KB = [
         "links": [{"label": "Order Online (VitalChek)", "url": "https://www.vitalchek.com"}],
         "follow_ups": ["Can I get it same day?", "What ID do I need?", "What if I was born in another county?"],
         "escalation": None,
-        "department": "Vital Records"
+        "department": "Vital Records",
     },
     {
         "intent": "death_certificate",
@@ -85,17 +106,23 @@ KB = [
         "links": [{"label": "Order Online (VitalChek)", "url": "https://www.vitalchek.com"}],
         "follow_ups": ["What about property taxes?", "How do I update the property deed?"],
         "escalation": None,
-        "department": "Vital Records"
+        "department": "Vital Records",
     },
     {
         "intent": "voter_registration",
         "category": "civic",
-        "patterns": ["register to vote", "voter registration", "update voter address", "where do I vote", "polling place"],
+        "patterns": [
+            "register to vote",
+            "voter registration",
+            "update voter address",
+            "where do I vote",
+            "polling place",
+        ],
         "response": "Register to vote or update your address online at sos.mo.gov/elections — it takes about 3 minutes. The deadline is the 4th Wednesday before any election. You can also look up your polling place at the same site.",
         "links": [{"label": "Register Online", "url": "https://www.sos.mo.gov/elections"}],
         "follow_ups": ["When is the next election?", "Can I vote early?"],
         "escalation": None,
-        "department": "Board of Elections"
+        "department": "Board of Elections",
     },
     {
         "intent": "adopt_pet",
@@ -105,7 +132,7 @@ KB = [
         "links": [{"label": "View Available Animals", "url": "https://stlouiscountymo.gov/adopt"}],
         "follow_ups": ["What does adoption cost?", "Can I foster instead?", "Do you have puppies?"],
         "escalation": None,
-        "department": "Animal Services"
+        "department": "Animal Services",
     },
     {
         "intent": "report_pothole",
@@ -115,17 +142,25 @@ KB = [
         "links": [],
         "follow_ups": ["What about traffic signals?", "Who handles snow removal?"],
         "escalation": None,
-        "department": "Transportation"
+        "department": "Transportation",
     },
     {
         "intent": "hours_locations",
         "category": "general",
-        "patterns": ["hours", "when are you open", "locations", "where", "office hours", "are you open friday", "government center"],
+        "patterns": [
+            "hours",
+            "when are you open",
+            "locations",
+            "where",
+            "office hours",
+            "are you open friday",
+            "government center",
+        ],
         "response": "County offices are open Monday through Thursday, 8am to 3:30pm. There is no Friday service at any location. West County Government Center is permanently closed. Open locations: Clayton Government HQ, Northwest Crossings, and South County Government Center.",
         "links": [],
         "follow_ups": ["How do I avoid waiting in line?", "Which location is closest to me?"],
         "escalation": None,
-        "department": "General"
+        "department": "General",
     },
     {
         "intent": "qless",
@@ -135,17 +170,25 @@ KB = [
         "links": [{"label": "Join QLess", "url": "https://stlouiscountymo.gov/qless"}],
         "follow_ups": ["What's the current wait time?", "Which location has the shortest wait?"],
         "escalation": None,
-        "department": "Customer Service"
+        "department": "Customer Service",
     },
     {
         "intent": "housing_help",
         "category": "help",
-        "patterns": ["housing help", "rent help", "homeless", "eviction", "emergency shelter", "can't pay rent", "need help"],
+        "patterns": [
+            "housing help",
+            "rent help",
+            "homeless",
+            "eviction",
+            "emergency shelter",
+            "can't pay rent",
+            "need help",
+        ],
         "response": "For housing assistance, emergency shelter, or rent/utility help, contact Human Services at 314-615-4800. You can also dial 211 anytime for 24/7 resource navigation. If you're in immediate danger, call 911.",
         "links": [],
         "follow_ups": ["What about food assistance?", "Are there programs for seniors?"],
         "escalation": {"trigger": "crisis", "to": "Human Services", "phone": "314-615-4800"},
-        "department": "Human Services"
+        "department": "Human Services",
     },
     {
         "intent": "not_county_vehicle",
@@ -155,7 +198,7 @@ KB = [
         "links": [{"label": "MO Dept of Revenue", "url": "https://dor.mo.gov"}],
         "follow_ups": [],
         "escalation": None,
-        "department": "NOT COUNTY — State"
+        "department": "NOT COUNTY — State",
     },
     {
         "intent": "not_county_marriage",
@@ -165,7 +208,7 @@ KB = [
         "links": [{"label": "Circuit Court", "url": "https://stlcountycourts.com"}],
         "follow_ups": [],
         "escalation": None,
-        "department": "NOT COUNTY — Court"
+        "department": "NOT COUNTY — Court",
     },
     {
         "intent": "not_county_snap",
@@ -175,7 +218,7 @@ KB = [
         "links": [{"label": "Apply for SNAP", "url": "https://mydss.mo.gov"}],
         "follow_ups": ["Are there food pantries near me?"],
         "escalation": None,
-        "department": "NOT COUNTY — State"
+        "department": "NOT COUNTY — State",
     },
     {
         "intent": "not_county_trash",
@@ -185,7 +228,7 @@ KB = [
         "links": [],
         "follow_ups": ["How do I know if I'm in unincorporated county?"],
         "escalation": None,
-        "department": "NOT COUNTY — Municipal"
+        "department": "NOT COUNTY — Municipal",
     },
 ]
 
@@ -201,7 +244,7 @@ METADATA = {
         "Escalation triggers suggest when to offer live agent transfer",
         "NOT COUNTY intents handle the #1 source of misdirected calls",
         "Hours current as of March 2025: Mon-Thu 8am-3:30pm, no Friday, West County closed",
-    ]
+    ],
 }
 
 
@@ -223,11 +266,11 @@ def export_markdown(output_path: str):
         lines.append(f"**Category**: {k['category']} | **Department**: {k['department']}")
         lines.append(f"**Patterns**: {', '.join(k['patterns'])}")
         lines.append(f"**Response**: {k['response']}")
-        if k['links']:
+        if k["links"]:
             lines.append(f"**Links**: {', '.join(link['label'] + ' → ' + link['url'] for link in k['links'])}")
-        if k['follow_ups']:
+        if k["follow_ups"]:
             lines.append(f"**Follow-ups**: {', '.join(k['follow_ups'])}")
-        if k['escalation']:
+        if k["escalation"]:
             lines.append(f"**Escalation**: {k['escalation']}")
         lines.append("")
     with open(output_path, "w") as f:

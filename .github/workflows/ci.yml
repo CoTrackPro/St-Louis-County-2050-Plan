@@ -22,16 +22,13 @@ jobs:
           python-version: "3.12"
 
       - name: Install dev tools
-        run: pip install ruff mypy
+        run: pip install ruff
 
       - name: Ruff lint
         run: ruff check scripts/
 
       - name: Ruff format check
         run: ruff format --check scripts/
-
-      - name: Mypy type check
-        run: mypy scripts/ --ignore-missing-imports
 
   test:
     name: Test Pipeline

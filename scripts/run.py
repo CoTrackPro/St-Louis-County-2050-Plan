@@ -88,6 +88,7 @@ def cmd_render(args: list[str]):
 def cmd_pipeline(args: list[str]):
     """Pipeline: score → render scorecard in one call."""
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", "-i", help="KPI data JSON")
     parser.add_argument("--department", "-d", default="unknown")
@@ -104,12 +105,20 @@ def cmd_pipeline(args: list[str]):
     # Step 1: Score
     scored_path = out_dir / "scored-kpis.json"
     print(f"📊 Step 1: Scoring KPIs from {input_file}...")
-    result = run_script("kpi_scorer.py", [
-        "--input", input_file,
-        "--department", dept,
-        "--format", "json",
-        "--output", str(scored_path),
-    ], capture=True)
+    result = run_script(
+        "kpi_scorer.py",
+        [
+            "--input",
+            input_file,
+            "--department",
+            dept,
+            "--format",
+            "json",
+            "--output",
+            str(scored_path),
+        ],
+        capture=True,
+    )
     if result.returncode != 0:
         print(f"❌ Scoring failed: {result.stderr}", file=sys.stderr)
         sys.exit(1)
@@ -120,10 +129,14 @@ def cmd_pipeline(args: list[str]):
         md_path = out_dir / "scorecard.md"
         print("📝 Step 2a: Rendering markdown scorecard...")
         render_args = [
-            "--input", str(scored_path),
-            "--department", dept,
-            "--format", "markdown",
-            "--output", str(md_path),
+            "--input",
+            str(scored_path),
+            "--department",
+            dept,
+            "--format",
+            "markdown",
+            "--output",
+            str(md_path),
         ]
         if parsed.period:
             render_args.extend(["--period", parsed.period])
@@ -134,10 +147,14 @@ def cmd_pipeline(args: list[str]):
         html_path = out_dir / "scorecard.html"
         print("🌐 Step 2b: Rendering HTML scorecard...")
         render_args = [
-            "--input", str(scored_path),
-            "--department", dept,
-            "--format", "html",
-            "--output", str(html_path),
+            "--input",
+            str(scored_path),
+            "--department",
+            dept,
+            "--format",
+            "html",
+            "--output",
+            str(html_path),
         ]
         if parsed.period:
             render_args.extend(["--period", parsed.period])
@@ -150,6 +167,7 @@ def cmd_pipeline(args: list[str]):
 def cmd_diagnose(args: list[str]):
     """Full diagnostic: score → benchmark → gap analysis → render."""
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--kpis", "-k", help="KPI data JSON")
     parser.add_argument("--assessments", "-a", help="KSAB assessments JSON")
@@ -169,10 +187,20 @@ def cmd_diagnose(args: list[str]):
     # Step 1: Score KPIs
     scored_path = out_dir / "1-scored-kpis.json"
     print("\n📊 Step 1: Scoring KPIs...")
-    run_script("kpi_scorer.py", [
-        "--input", kpi_file, "--department", dept,
-        "--format", "json", "--output", str(scored_path),
-    ], capture=True)
+    run_script(
+        "kpi_scorer.py",
+        [
+            "--input",
+            kpi_file,
+            "--department",
+            dept,
+            "--format",
+            "json",
+            "--output",
+            str(scored_path),
+        ],
+        capture=True,
+    )
     print(f"  ✅ → {scored_path}")
 
     # Step 2: Benchmark comparison
@@ -185,35 +213,73 @@ def cmd_diagnose(args: list[str]):
         for k in kpis
     ]
     bench_path = out_dir / "2-benchmark-report.md"
-    run_script("benchmark_comparator.py", [
-        "--benchmarks", str(BENCHMARK_CSV),
-        "--inline", json.dumps(bench_input),
-        "--format", "markdown",
-        "--output", str(bench_path),
-    ], capture=True)
+    run_script(
+        "benchmark_comparator.py",
+        [
+            "--benchmarks",
+            str(BENCHMARK_CSV),
+            "--inline",
+            json.dumps(bench_input),
+            "--format",
+            "markdown",
+            "--output",
+            str(bench_path),
+        ],
+        capture=True,
+    )
     print(f"  ✅ → {bench_path}")
 
     # Step 3: KSAB gap analysis
     print("\n🧠 Step 3: KSAB gap analysis...")
     gap_path = out_dir / "3-gap-analysis.md"
-    run_script("ksab_gap_calculator.py", [
-        "--input", assessment_file, "--department", dept,
-        "--format", "markdown", "--output", str(gap_path),
-    ], capture=True)
+    run_script(
+        "ksab_gap_calculator.py",
+        [
+            "--input",
+            assessment_file,
+            "--department",
+            dept,
+            "--format",
+            "markdown",
+            "--output",
+            str(gap_path),
+        ],
+        capture=True,
+    )
     print(f"  ✅ → {gap_path}")
 
     # Step 4: Render scorecard
     print("\n📋 Step 4: Rendering scorecard...")
     html_path = out_dir / "4-scorecard.html"
-    run_script("scorecard_renderer.py", [
-        "--input", str(scored_path), "--department", dept,
-        "--format", "html", "--output", str(html_path),
-    ], capture=True)
+    run_script(
+        "scorecard_renderer.py",
+        [
+            "--input",
+            str(scored_path),
+            "--department",
+            dept,
+            "--format",
+            "html",
+            "--output",
+            str(html_path),
+        ],
+        capture=True,
+    )
     md_path = out_dir / "4-scorecard.md"
-    run_script("scorecard_renderer.py", [
-        "--input", str(scored_path), "--department", dept,
-        "--format", "markdown", "--output", str(md_path),
-    ], capture=True)
+    run_script(
+        "scorecard_renderer.py",
+        [
+            "--input",
+            str(scored_path),
+            "--department",
+            dept,
+            "--format",
+            "markdown",
+            "--output",
+            str(md_path),
+        ],
+        capture=True,
+    )
     print(f"  ✅ → {html_path}")
     print(f"  ✅ → {md_path}")
 
