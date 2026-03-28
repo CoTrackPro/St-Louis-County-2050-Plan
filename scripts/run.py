@@ -22,10 +22,9 @@ Usage:
     python scripts/run.py diagnose --kpis kpis.json --assessments assessments.json --department permits
 """
 
+import json
 import subprocess
 import sys
-import json
-import os
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent
@@ -119,7 +118,7 @@ def cmd_pipeline(args: list[str]):
     # Step 2: Render
     if parsed.format in ("markdown", "both"):
         md_path = out_dir / "scorecard.md"
-        print(f"📝 Step 2a: Rendering markdown scorecard...")
+        print("📝 Step 2a: Rendering markdown scorecard...")
         render_args = [
             "--input", str(scored_path),
             "--department", dept,
@@ -133,7 +132,7 @@ def cmd_pipeline(args: list[str]):
 
     if parsed.format in ("html", "both"):
         html_path = out_dir / "scorecard.html"
-        print(f"🌐 Step 2b: Rendering HTML scorecard...")
+        print("🌐 Step 2b: Rendering HTML scorecard...")
         render_args = [
             "--input", str(scored_path),
             "--department", dept,
@@ -169,7 +168,7 @@ def cmd_diagnose(args: list[str]):
 
     # Step 1: Score KPIs
     scored_path = out_dir / "1-scored-kpis.json"
-    print(f"\n📊 Step 1: Scoring KPIs...")
+    print("\n📊 Step 1: Scoring KPIs...")
     run_script("kpi_scorer.py", [
         "--input", kpi_file, "--department", dept,
         "--format", "json", "--output", str(scored_path),
@@ -177,7 +176,7 @@ def cmd_diagnose(args: list[str]):
     print(f"  ✅ → {scored_path}")
 
     # Step 2: Benchmark comparison
-    print(f"\n📈 Step 2: Benchmark comparison...")
+    print("\n📈 Step 2: Benchmark comparison...")
     # Extract kpi_ids and values for benchmark
     with open(kpi_file) as f:
         kpis = json.load(f)
@@ -195,7 +194,7 @@ def cmd_diagnose(args: list[str]):
     print(f"  ✅ → {bench_path}")
 
     # Step 3: KSAB gap analysis
-    print(f"\n🧠 Step 3: KSAB gap analysis...")
+    print("\n🧠 Step 3: KSAB gap analysis...")
     gap_path = out_dir / "3-gap-analysis.md"
     run_script("ksab_gap_calculator.py", [
         "--input", assessment_file, "--department", dept,
@@ -204,7 +203,7 @@ def cmd_diagnose(args: list[str]):
     print(f"  ✅ → {gap_path}")
 
     # Step 4: Render scorecard
-    print(f"\n📋 Step 4: Rendering scorecard...")
+    print("\n📋 Step 4: Rendering scorecard...")
     html_path = out_dir / "4-scorecard.html"
     run_script("scorecard_renderer.py", [
         "--input", str(scored_path), "--department", dept,
@@ -220,7 +219,7 @@ def cmd_diagnose(args: list[str]):
 
     print(f"\n{'=' * 50}")
     print(f"✅ Full diagnostic complete. Outputs in {out_dir}/")
-    print(f"\nFiles:")
+    print("\nFiles:")
     for f in sorted(out_dir.iterdir()):
         size = f.stat().st_size
         print(f"  {f.name} ({size:,} bytes)")
@@ -249,11 +248,11 @@ def main():
             print(f"  {name:12s}  {desc}")
         print(f"\nSample data:  {SAMPLE_KPIS}")
         print(f"Benchmarks:   {BENCHMARK_CSV}")
-        print(f"\nExamples:")
-        print(f"  python scripts/run.py pipeline --input assets/sample-kpis.json -d 'Permits'")
-        print(f"  python scripts/run.py diagnose  # uses sample data")
-        print(f"  python scripts/run.py benchmark --actuals actuals.json")
-        print(f"  python scripts/run.py audit --sql")
+        print("\nExamples:")
+        print("  python scripts/run.py pipeline --input assets/sample-kpis.json -d 'Permits'")
+        print("  python scripts/run.py diagnose  # uses sample data")
+        print("  python scripts/run.py benchmark --actuals actuals.json")
+        print("  python scripts/run.py audit --sql")
         sys.exit(0)
 
     command = sys.argv[1]

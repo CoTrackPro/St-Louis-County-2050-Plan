@@ -21,11 +21,10 @@ Input actuals format (JSON):
 Benchmark CSV columns: kpi_id, kpi_name, department, unit, source, peer_group, year, p25, median, p75, best_in_class, notes
 """
 
+import argparse
+import csv
 import json
 import sys
-import csv
-import argparse
-from typing import Any
 
 
 def load_benchmarks(path: str) -> list[dict]:

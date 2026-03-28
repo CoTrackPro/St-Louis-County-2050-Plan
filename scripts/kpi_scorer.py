@@ -27,10 +27,9 @@ Input format (JSON array):
 Output: Scored KPIs with status, gap, trend, plus department composite.
 """
 
+import argparse
 import json
 import sys
-import argparse
-from typing import Any
 
 
 def score_kpi(kpi: dict) -> dict:

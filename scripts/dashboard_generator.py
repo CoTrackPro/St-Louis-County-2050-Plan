@@ -11,11 +11,10 @@ Usage:
     python scripts/dashboard_generator.py --demo  # Uses sample data
 """
 
+import argparse
 import json
 import sys
-import argparse
 from pathlib import Path
-from datetime import datetime
 
 SKILL_DIR = Path(__file__).parent.parent
 SAMPLE_KPIS = SKILL_DIR / "assets" / "sample-kpis.json"
@@ -377,7 +376,11 @@ def load_raw(input_path: str) -> dict:
                     else:
                         trend_dir = "improving" if trend_pct and trend_pct > 0 else "declining" if trend_pct and trend_pct < 0 else "flat"
                 else:
-                    att = None; gap = None; status = "⚪"; trend_pct = None; trend_dir = None
+                    att = None
+                    gap = None
+                    status = "⚪"
+                    trend_pct = None
+                    trend_dir = None
 
                 scored.append({**k, "attainment_pct": att, "gap": gap, "status": status,
                               "trend_pct": trend_pct, "trend_direction": trend_dir})
@@ -386,7 +389,8 @@ def load_raw(input_path: str) -> dict:
             composite = round(sum(min(a, 120) for a in atts) / len(atts), 1) if atts else None
             counts = {"🟢": 0, "🟡": 0, "🔴": 0}
             for s in scored:
-                if s["status"] in counts: counts[s["status"]] += 1
+                if s["status"] in counts:
+                    counts[s["status"]] += 1
 
             result[dept_id] = {
                 "department_name": dept_info["name"],

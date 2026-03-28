@@ -11,11 +11,8 @@ Usage:
     python scripts/onboarding_plan_generator.py --role "Tax Agent" --department revenue --output plan.md
 """
 
-import json
-import sys
 import argparse
 from datetime import datetime, timedelta
-from typing import Any
 
 # Universal onboarding (all employees, Week 1)
 UNIVERSAL_WEEK1 = [
@@ -232,15 +229,15 @@ def generate_plan(role: str, department: str, start_date: str = None) -> str:
     title = curriculum.get("title", role)
 
     lines = [
-        f"# 90-Day Onboarding Plan",
+        "# 90-Day Onboarding Plan",
         f"**Employee Role**: {title}",
         f"**Department**: {department}",
         f"**Start Date**: {start.strftime('%Y-%m-%d')} ({start.strftime('%A')})",
         f"**Day 30 Check-in**: {get_business_day(start, 30).strftime('%Y-%m-%d')}",
         f"**Day 60 Check-in**: {get_business_day(start, 60).strftime('%Y-%m-%d')}",
         f"**Day 90 Graduation**: {get_business_day(start, 90).strftime('%Y-%m-%d')}",
-        f"**Buddy**: [Assign before start date]",
-        f"**Mentor**: [Assign before start date]",
+        "**Buddy**: [Assign before start date]",
+        "**Mentor**: [Assign before start date]",
         "",
         "---",
         "",
@@ -312,7 +309,7 @@ def generate_plan(role: str, department: str, start_date: str = None) -> str:
     # Success criteria
     criteria = curriculum.get("success_criteria", GENERIC_CURRICULUM["success_criteria"])
     lines.extend(["---", "", "## Day 90 Success Criteria", ""])
-    for i, c in enumerate(criteria, 1):
+    for _i, c in enumerate(criteria, 1):
         lines.append(f"- [ ] {c}")
     lines.extend([
         "",

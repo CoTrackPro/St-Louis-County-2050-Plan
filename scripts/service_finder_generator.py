@@ -10,10 +10,7 @@ Usage:
     python scripts/service_finder_generator.py --output service-finder.jsx
 """
 
-import json
-import sys
 import argparse
-from pathlib import Path
 
 
 def generate_service_finder() -> str:

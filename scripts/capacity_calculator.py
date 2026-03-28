@@ -13,11 +13,9 @@ Usage:
     python scripts/capacity_calculator.py --interactive
 """
 
-import json
-import sys
 import argparse
+import json
 import math
-from typing import Any
 
 
 def factorial(n: int) -> int:
@@ -155,7 +153,7 @@ def calculate_queue_metrics(
 def scenario_friday_closure(baseline_arrival: float, service_time: float, staff: int) -> dict:
     """Model impact of eliminating Friday service."""
     pre = calculate_queue_metrics(baseline_arrival, service_time, staff, 7.5, 5)
-    
+
     # Friday demand redistributes to Mon-Thu (25% increase per day)
     adjusted_arrival = baseline_arrival * 5 / 4
     post = calculate_queue_metrics(adjusted_arrival, service_time, staff, 7.5, 4)
@@ -217,7 +215,7 @@ def format_report(metrics: dict) -> str:
         if "description" in metrics:
             lines.append(f"*{metrics['description']}*")
         lines.append("")
-        
+
         if "impact" in metrics:
             lines.append("## Impact Summary")
             lines.append("")

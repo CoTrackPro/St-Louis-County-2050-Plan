@@ -44,12 +44,11 @@ Input format (JSON array of journey instances):
     ]
 """
 
+import argparse
 import json
 import sys
-import argparse
-from datetime import datetime
 from collections import defaultdict
-from typing import Any
+from datetime import datetime
 
 JOURNEY_TARGETS = {
     "building_project": {

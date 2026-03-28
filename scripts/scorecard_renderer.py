@@ -11,11 +11,10 @@ Usage:
     python scripts/scorecard_renderer.py --inline '{...}' --format markdown
 """
 
+import argparse
 import json
 import sys
-import argparse
 from datetime import datetime
-from typing import Any
 
 
 def render_sparkline_text(values: list[float]) -> str:

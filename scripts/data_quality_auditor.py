@@ -14,14 +14,14 @@ Input CSV columns: kpi_id, period_start, period_end, value, data_quality
 Input JSON: array of objects with same fields
 """
 
-import json
-import sys
-import csv
 import argparse
-from datetime import datetime, timedelta
-from collections import defaultdict
-from typing import Any
+import contextlib
+import csv
+import json
 import math
+import sys
+from collections import defaultdict
+from datetime import datetime
 
 
 def load_csv(path: str) -> list[dict]:
@@ -31,10 +31,8 @@ def load_csv(path: str) -> list[dict]:
         for row in reader:
             for num_field in ("value",):
                 if num_field in row and row[num_field]:
-                    try:
+                    with contextlib.suppress(ValueError):
                         row[num_field] = float(row[num_field])
-                    except ValueError:
-                        pass
             rows.append(row)
         return rows
 
@@ -66,10 +64,8 @@ def check_completeness(measurements: list[dict]) -> dict:
         # Check for missing periods (assumes monthly)
         dates = []
         for r in records:
-            try:
+            with contextlib.suppress(ValueError, TypeError):
                 dates.append(datetime.strptime(r.get("period_start", ""), "%Y-%m-%d"))
-            except (ValueError, TypeError):
-                pass
 
         if len(dates) >= 2:
             dates.sort()

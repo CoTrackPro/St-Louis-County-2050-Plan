@@ -24,10 +24,9 @@ Input format (JSON array):
     ]
 """
 
+import argparse
 import json
 import sys
-import argparse
-from typing import Any
 
 # Domain-matched intervention lookup
 INTERVENTIONS = {

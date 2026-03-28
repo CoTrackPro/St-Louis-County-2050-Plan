@@ -12,9 +12,8 @@ Usage:
     python scripts/chatbot_export.py --format markdown     # Human-readable review
 """
 
-import json
-import sys
 import argparse
+import json
 from datetime import datetime
 
 KB = [
@@ -225,7 +224,7 @@ def export_markdown(output_path: str):
         lines.append(f"**Patterns**: {', '.join(k['patterns'])}")
         lines.append(f"**Response**: {k['response']}")
         if k['links']:
-            lines.append(f"**Links**: {', '.join(l['label'] + ' → ' + l['url'] for l in k['links'])}")
+            lines.append(f"**Links**: {', '.join(link['label'] + ' → ' + link['url'] for link in k['links'])}")
         if k['follow_ups']:
             lines.append(f"**Follow-ups**: {', '.join(k['follow_ups'])}")
         if k['escalation']:
