@@ -1,0 +1,177 @@
+{
+  "$schema": "KPI Data Model — St. Louis County Government Services",
+  "version": "1.0.0",
+  "description": "Schema for storing, tracking, and reporting KPIs across all county departments.",
+
+  "tables": {
+    "departments": {
+      "description": "County departments and divisions",
+      "columns": {
+        "department_id": { "type": "string", "pk": true, "example": "permits" },
+        "name": { "type": "string", "example": "Permits & Licensing" },
+        "division": { "type": "string", "nullable": true, "example": "Planning & Development" },
+        "director_name": { "type": "string", "example": "Jane Smith" },
+        "director_email": { "type": "string", "example": "jsmith@stlouiscountymo.gov" },
+        "fte_count": { "type": "integer", "example": 42 },
+        "budget_annual": { "type": "number", "example": 3200000 },
+        "service_locations": { "type": "string[]", "example": ["Clayton HQ", "NW Crossings", "South County"] },
+        "created_at": { "type": "timestamp" },
+        "updated_at": { "type": "timestamp" }
+      }
+    },
+
+    "kpi_definitions": {
+      "description": "Master catalog of all KPI definitions",
+      "columns": {
+        "kpi_id": { "type": "string", "pk": true, "example": "permits_avg_processing" },
+        "department_id": { "type": "string", "fk": "departments.department_id" },
+        "name": { "type": "string", "example": "Average Permit Processing Time" },
+        "description": { "type": "text", "example": "Calendar days from complete application submission to final decision" },
+        "unit": { "type": "string", "example": "days" },
+        "format": { "type": "enum", "values": ["number", "percentage", "currency", "rating", "count"], "example": "number" },
+        "direction": { "type": "enum", "values": ["higher_is_better", "lower_is_better"], "example": "lower_is_better" },
+        "target_value": { "type": "number", "example": 10 },
+        "target_source": { "type": "string", "example": "ICMA peer median adjusted for complexity mix" },
+        "data_source": { "type": "string", "example": "Permit management system" },
+        "collection_frequency": { "type": "enum", "values": ["daily", "weekly", "monthly", "quarterly", "annually", "per_event"], "example": "monthly" },
+        "equity_disaggregation": { "type": "string[]", "example": ["geographic_zone", "permit_type"] },
+        "alert_threshold_yellow": { "type": "number", "description": "Value at which status becomes yellow", "example": 12 },
+        "alert_threshold_red": { "type": "number", "description": "Value at which status becomes red", "example": 15 },
+        "category": { "type": "enum", "values": ["efficiency", "effectiveness", "equity", "economy", "satisfaction"], "example": "efficiency" },
+        "is_active": { "type": "boolean", "default": true },
+        "created_at": { "type": "timestamp" },
+        "updated_at": { "type": "timestamp" }
+      }
+    },
+
+    "kpi_measurements": {
+      "description": "Individual KPI data points over time",
+      "columns": {
+        "measurement_id": { "type": "uuid", "pk": true },
+        "kpi_id": { "type": "string", "fk": "kpi_definitions.kpi_id" },
+        "period_start": { "type": "date", "example": "2026-01-01" },
+        "period_end": { "type": "date", "example": "2026-01-31" },
+        "value": { "type": "number", "example": 12.3 },
+        "denominator": { "type": "number", "nullable": true, "description": "For rate KPIs, the denominator", "example": 1500 },
+        "numerator": { "type": "number", "nullable": true, "description": "For rate KPIs, the numerator", "example": 1005 },
+        "data_quality": { "type": "enum", "values": ["measured", "estimated", "projected"], "default": "measured" },
+        "notes": { "type": "text", "nullable": true },
+        "reported_by": { "type": "string", "example": "analyst@stlouiscountymo.gov" },
+        "created_at": { "type": "timestamp" }
+      },
+      "indexes": [
+        { "columns": ["kpi_id", "period_start"], "unique": true },
+        { "columns": ["period_start"] }
+      ]
+    },
+
+    "kpi_measurements_disaggregated": {
+      "description": "Disaggregated KPI data for equity analysis",
+      "columns": {
+        "measurement_id": { "type": "uuid", "pk": true },
+        "parent_measurement_id": { "type": "uuid", "fk": "kpi_measurements.measurement_id" },
+        "kpi_id": { "type": "string", "fk": "kpi_definitions.kpi_id" },
+        "dimension": { "type": "string", "example": "geographic_zone" },
+        "dimension_value": { "type": "string", "example": "north_county" },
+        "value": { "type": "number", "example": 14.1 },
+        "denominator": { "type": "number", "nullable": true },
+        "numerator": { "type": "number", "nullable": true },
+        "created_at": { "type": "timestamp" }
+      },
+      "indexes": [
+        { "columns": ["parent_measurement_id", "dimension", "dimension_value"], "unique": true }
+      ]
+    },
+
+    "initiatives": {
+      "description": "KPI improvement initiatives and projects",
+      "columns": {
+        "initiative_id": { "type": "uuid", "pk": true },
+        "department_id": { "type": "string", "fk": "departments.department_id" },
+        "title": { "type": "string", "example": "Launch digital permit portal v2" },
+        "description": { "type": "text" },
+        "status": { "type": "enum", "values": ["planning", "in_progress", "complete", "blocked", "cancelled"], "example": "in_progress" },
+        "impact": { "type": "enum", "values": ["high", "medium", "low"], "example": "high" },
+        "owner_name": { "type": "string", "example": "IT + Planning" },
+        "owner_email": { "type": "string", "nullable": true },
+        "target_kpi_ids": { "type": "string[]", "description": "KPIs this initiative aims to improve", "example": ["permits_avg_processing", "permits_online_adoption"] },
+        "start_date": { "type": "date" },
+        "target_completion_date": { "type": "date" },
+        "actual_completion_date": { "type": "date", "nullable": true },
+        "estimated_cost": { "type": "number", "nullable": true },
+        "funding_source": { "type": "string", "nullable": true },
+        "created_at": { "type": "timestamp" },
+        "updated_at": { "type": "timestamp" }
+      }
+    },
+
+    "initiative_milestones": {
+      "description": "Milestones within improvement initiatives",
+      "columns": {
+        "milestone_id": { "type": "uuid", "pk": true },
+        "initiative_id": { "type": "uuid", "fk": "initiatives.initiative_id" },
+        "title": { "type": "string", "example": "Complete requirements gathering" },
+        "due_date": { "type": "date" },
+        "completed_date": { "type": "date", "nullable": true },
+        "status": { "type": "enum", "values": ["pending", "in_progress", "complete", "overdue"], "example": "pending" },
+        "notes": { "type": "text", "nullable": true }
+      }
+    },
+
+    "benchmarks": {
+      "description": "National and peer benchmarks for comparison",
+      "columns": {
+        "benchmark_id": { "type": "uuid", "pk": true },
+        "kpi_id": { "type": "string", "fk": "kpi_definitions.kpi_id" },
+        "source": { "type": "string", "example": "ICMA 2025 Benchmarking Survey" },
+        "peer_group": { "type": "string", "example": "Counties 500K-1M population" },
+        "percentile_25": { "type": "number" },
+        "median": { "type": "number" },
+        "percentile_75": { "type": "number" },
+        "best_in_class": { "type": "number", "nullable": true },
+        "year": { "type": "integer", "example": 2025 },
+        "created_at": { "type": "timestamp" }
+      }
+    }
+  },
+
+  "example_rows": {
+    "kpi_definitions": [
+      {
+        "kpi_id": "permits_avg_processing",
+        "department_id": "permits",
+        "name": "Average Permit Processing Time",
+        "unit": "days",
+        "format": "number",
+        "direction": "lower_is_better",
+        "target_value": 10,
+        "collection_frequency": "monthly",
+        "category": "efficiency",
+        "alert_threshold_yellow": 12,
+        "alert_threshold_red": 15
+      },
+      {
+        "kpi_id": "customer_qless_wait",
+        "department_id": "customer",
+        "name": "Qless Virtual Queue Wait Time",
+        "unit": "minutes",
+        "format": "number",
+        "direction": "lower_is_better",
+        "target_value": 20,
+        "collection_frequency": "weekly",
+        "category": "satisfaction",
+        "alert_threshold_yellow": 25,
+        "alert_threshold_red": 35
+      }
+    ],
+    "kpi_measurements": [
+      {
+        "kpi_id": "permits_avg_processing",
+        "period_start": "2026-01-01",
+        "period_end": "2026-01-31",
+        "value": 12.3,
+        "data_quality": "measured"
+      }
+    ]
+  }
+}

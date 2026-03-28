@@ -1,0 +1,92 @@
+[
+  {
+    "competency_id": "PL-K1",
+    "name": "Zoning code, building code, land use regulations",
+    "domain": "knowledge",
+    "assessed_level": 3,
+    "target_level": 4,
+    "linked_kpis": ["permits_first_pass"],
+    "staff_count": 12,
+    "assessment_method": "knowledge_test"
+  },
+  {
+    "competency_id": "PL-S1",
+    "name": "Plan review — residential and commercial",
+    "domain": "skill",
+    "assessed_level": 2,
+    "target_level": 4,
+    "linked_kpis": ["permits_avg_processing"],
+    "staff_count": 8,
+    "assessment_method": "supervisor_observation"
+  },
+  {
+    "competency_id": "PL-S3",
+    "name": "Digital permit system operation",
+    "domain": "skill",
+    "assessed_level": 2,
+    "target_level": 3,
+    "linked_kpis": ["permits_online_adoption"],
+    "staff_count": 15,
+    "assessment_method": "skills_demo"
+  },
+  {
+    "competency_id": "PL-A1",
+    "name": "Customer-first mindset (applicant is not adversary)",
+    "domain": "attitude",
+    "assessed_level": 2,
+    "target_level": 3,
+    "linked_kpis": ["permits_first_pass"],
+    "staff_count": 15,
+    "assessment_method": "360_feedback"
+  },
+  {
+    "competency_id": "PL-A2",
+    "name": "Openness to pre-application guidance",
+    "domain": "attitude",
+    "assessed_level": 1,
+    "target_level": 3,
+    "linked_kpis": ["permits_first_pass"],
+    "staff_count": 12,
+    "assessment_method": "360_feedback"
+  },
+  {
+    "competency_id": "PL-B1",
+    "name": "Completes reviews within SLA consistently",
+    "domain": "behavior",
+    "assessed_level": 2,
+    "target_level": 3,
+    "linked_kpis": ["permits_avg_processing", "permits_backlog"],
+    "staff_count": 8,
+    "assessment_method": "system_data"
+  },
+  {
+    "competency_id": "PL-B2",
+    "name": "Provides written feedback on rejections with fix path",
+    "domain": "behavior",
+    "assessed_level": 1,
+    "target_level": 3,
+    "linked_kpis": ["permits_first_pass"],
+    "staff_count": 8,
+    "assessment_method": "supervisor_observation"
+  },
+  {
+    "competency_id": "CS-K1",
+    "name": "County services catalog knowledge",
+    "domain": "knowledge",
+    "assessed_level": 3,
+    "target_level": 4,
+    "linked_kpis": ["customer_fcr", "customer_wait_time"],
+    "staff_count": 22,
+    "assessment_method": "knowledge_test"
+  },
+  {
+    "competency_id": "CS-B1",
+    "name": "Offers digital self-service option in every interaction",
+    "domain": "behavior",
+    "assessed_level": 1,
+    "target_level": 3,
+    "linked_kpis": ["customer_digital_rate"],
+    "staff_count": 22,
+    "assessment_method": "mystery_shopper"
+  }
+]

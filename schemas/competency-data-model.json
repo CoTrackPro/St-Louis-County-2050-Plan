@@ -1,0 +1,218 @@
+{
+  "$schema": "Competency & KSAB Data Model — St. Louis County Workforce Development",
+  "version": "1.0.0",
+  "description": "Schema for tracking competency assessments, KSAB gap scores, training activities, and development plans across county workforce.",
+
+  "tables": {
+    "competency_definitions": {
+      "description": "Master catalog of all competency elements",
+      "columns": {
+        "competency_id": { "type": "string", "pk": true, "example": "PL-S1" },
+        "department_id": { "type": "string", "fk": "departments.department_id", "nullable": true, "description": "null = county-wide core competency" },
+        "category": { "type": "string", "example": "Technical", "description": "Grouping: Core, Technical, Leadership, Equity" },
+        "name": { "type": "string", "example": "Plan review — residential and commercial" },
+        "description": { "type": "text" },
+        "ksab_domain": { "type": "enum", "values": ["knowledge", "skill", "attitude", "behavior"] },
+        "target_level_frontline": { "type": "integer", "min": 1, "max": 5, "example": 4 },
+        "target_level_supervisor": { "type": "integer", "min": 1, "max": 5, "example": 4 },
+        "target_level_director": { "type": "integer", "min": 1, "max": 5, "example": 5 },
+        "linked_kpi_ids": { "type": "string[]", "description": "KPIs this competency influences", "example": ["permits_avg_processing", "permits_first_pass"] },
+        "gap_signal": { "type": "string", "description": "Observable KPI symptom when this competency is lacking", "example": "Slow processing time, rework" },
+        "assessment_methods": { "type": "string[]", "example": ["knowledge_test", "supervisor_observation"] },
+        "is_active": { "type": "boolean", "default": true },
+        "created_at": { "type": "timestamp" },
+        "updated_at": { "type": "timestamp" }
+      }
+    },
+
+    "employees": {
+      "description": "Employee roster for competency tracking (minimal PII)",
+      "columns": {
+        "employee_id": { "type": "uuid", "pk": true },
+        "department_id": { "type": "string", "fk": "departments.department_id" },
+        "role_tier": { "type": "enum", "values": ["frontline", "supervisor", "director", "executive"] },
+        "job_title": { "type": "string", "example": "Plan Reviewer II" },
+        "hire_date": { "type": "date" },
+        "tenure_years": { "type": "number", "computed": true },
+        "retirement_eligible_date": { "type": "date", "nullable": true },
+        "is_active": { "type": "boolean", "default": true },
+        "created_at": { "type": "timestamp" },
+        "updated_at": { "type": "timestamp" }
+      },
+      "security_note": "No names, SSNs, or demographics stored in KPI system. Link to HR system of record via employee_id only. PII stays in HR system."
+    },
+
+    "competency_assessments": {
+      "description": "Individual employee proficiency assessments",
+      "columns": {
+        "assessment_id": { "type": "uuid", "pk": true },
+        "employee_id": { "type": "uuid", "fk": "employees.employee_id" },
+        "competency_id": { "type": "string", "fk": "competency_definitions.competency_id" },
+        "assessed_level": { "type": "integer", "min": 1, "max": 5 },
+        "target_level": { "type": "integer", "min": 1, "max": 5, "description": "Target for this employee's role tier at time of assessment" },
+        "gap_score": { "type": "integer", "computed": true, "description": "target_level - assessed_level" },
+        "assessment_method": { "type": "enum", "values": ["knowledge_test", "skills_demo", "supervisor_observation", "360_feedback", "self_assessment", "system_data", "mystery_shopper", "structured_interview"] },
+        "assessor_role": { "type": "string", "example": "supervisor" },
+        "evidence_notes": { "type": "text", "nullable": true },
+        "assessment_date": { "type": "date" },
+        "created_at": { "type": "timestamp" }
+      },
+      "indexes": [
+        { "columns": ["employee_id", "competency_id", "assessment_date"], "unique": true },
+        { "columns": ["competency_id", "assessment_date"] },
+        { "columns": ["assessment_date"] }
+      ]
+    },
+
+    "development_plans": {
+      "description": "Individual Development Plans linking gaps to activities",
+      "columns": {
+        "plan_id": { "type": "uuid", "pk": true },
+        "employee_id": { "type": "uuid", "fk": "employees.employee_id" },
+        "plan_type": { "type": "enum", "values": ["professional_growth", "performance_improvement", "succession_prep"] },
+        "status": { "type": "enum", "values": ["draft", "active", "completed", "cancelled"] },
+        "start_date": { "type": "date" },
+        "end_date": { "type": "date" },
+        "supervisor_id": { "type": "uuid", "fk": "employees.employee_id" },
+        "mentor_id": { "type": "uuid", "fk": "employees.employee_id", "nullable": true },
+        "created_at": { "type": "timestamp" },
+        "updated_at": { "type": "timestamp" }
+      }
+    },
+
+    "development_goals": {
+      "description": "SMART goals within a development plan",
+      "columns": {
+        "goal_id": { "type": "uuid", "pk": true },
+        "plan_id": { "type": "uuid", "fk": "development_plans.plan_id" },
+        "goal_statement": { "type": "text", "example": "Improve plan review speed from 15 days avg to 10 days avg by Dec 2026" },
+        "linked_competency_ids": { "type": "string[]", "example": ["PL-S1", "PL-B1"] },
+        "linked_kpi_id": { "type": "string", "fk": "kpi_definitions.kpi_id", "nullable": true },
+        "ksab_domain": { "type": "enum", "values": ["knowledge", "skill", "attitude", "behavior"] },
+        "baseline_proficiency": { "type": "integer", "min": 1, "max": 5 },
+        "target_proficiency": { "type": "integer", "min": 1, "max": 5 },
+        "status": { "type": "enum", "values": ["not_started", "in_progress", "met", "partially_met", "not_met"] },
+        "outcome_proficiency": { "type": "integer", "min": 1, "max": 5, "nullable": true },
+        "outcome_notes": { "type": "text", "nullable": true },
+        "created_at": { "type": "timestamp" },
+        "updated_at": { "type": "timestamp" }
+      }
+    },
+
+    "development_activities": {
+      "description": "Specific activities within a development goal",
+      "columns": {
+        "activity_id": { "type": "uuid", "pk": true },
+        "goal_id": { "type": "uuid", "fk": "development_goals.goal_id" },
+        "description": { "type": "text", "example": "Complete zoning code eLearning modules 1-4" },
+        "activity_type": { "type": "enum", "values": ["elearning", "classroom", "ojt", "shadowing", "simulation", "coaching", "mentoring", "job_aid", "cross_training", "certification", "site_visit", "self_study", "project_assignment", "peer_observation"] },
+        "ksab_domain": { "type": "enum", "values": ["knowledge", "skill", "attitude", "behavior"] },
+        "hours": { "type": "number", "nullable": true },
+        "cost": { "type": "number", "nullable": true },
+        "due_date": { "type": "date" },
+        "completed_date": { "type": "date", "nullable": true },
+        "completion_evidence": { "type": "text", "nullable": true, "example": "Certificate uploaded; quiz score 92%" },
+        "status": { "type": "enum", "values": ["planned", "in_progress", "completed", "skipped"] },
+        "created_at": { "type": "timestamp" },
+        "updated_at": { "type": "timestamp" }
+      }
+    },
+
+    "training_programs": {
+      "description": "Catalog of available training programs",
+      "columns": {
+        "program_id": { "type": "uuid", "pk": true },
+        "title": { "type": "string", "example": "Customer Service Excellence for Government" },
+        "description": { "type": "text" },
+        "ksab_domains_addressed": { "type": "string[]", "example": ["knowledge", "skill"] },
+        "competency_ids_addressed": { "type": "string[]", "example": ["CS-K1", "CS-S1", "CS-S2"] },
+        "modality": { "type": "enum", "values": ["elearning", "classroom", "blended", "ojt", "simulation", "coaching", "certification", "conference"] },
+        "duration_hours": { "type": "number", "example": 8 },
+        "provider": { "type": "string", "example": "Internal — HR Training Division" },
+        "cost_per_participant": { "type": "number", "example": 0 },
+        "max_participants": { "type": "integer", "nullable": true },
+        "prerequisites": { "type": "string[]", "nullable": true },
+        "certification_earned": { "type": "string", "nullable": true },
+        "kirkpatrick_level_measured": { "type": "integer", "min": 1, "max": 4, "example": 2 },
+        "is_mandatory": { "type": "boolean", "default": false },
+        "recurrence": { "type": "enum", "values": ["one_time", "annual", "biennial", "as_needed"], "default": "one_time" },
+        "linked_kpi_ids": { "type": "string[]", "nullable": true },
+        "is_active": { "type": "boolean", "default": true },
+        "created_at": { "type": "timestamp" },
+        "updated_at": { "type": "timestamp" }
+      }
+    },
+
+    "training_enrollments": {
+      "description": "Employee enrollment and completion records for training programs",
+      "columns": {
+        "enrollment_id": { "type": "uuid", "pk": true },
+        "program_id": { "type": "uuid", "fk": "training_programs.program_id" },
+        "employee_id": { "type": "uuid", "fk": "employees.employee_id" },
+        "development_activity_id": { "type": "uuid", "fk": "development_activities.activity_id", "nullable": true },
+        "enrolled_date": { "type": "date" },
+        "completed_date": { "type": "date", "nullable": true },
+        "status": { "type": "enum", "values": ["enrolled", "in_progress", "completed", "no_show", "withdrawn"] },
+        "pre_assessment_score": { "type": "number", "nullable": true },
+        "post_assessment_score": { "type": "number", "nullable": true },
+        "reaction_score": { "type": "number", "nullable": true, "description": "Kirkpatrick Level 1 — 1-5 scale" },
+        "created_at": { "type": "timestamp" }
+      },
+      "indexes": [
+        { "columns": ["employee_id", "program_id", "enrolled_date"] },
+        { "columns": ["program_id", "status"] }
+      ]
+    },
+
+    "department_gap_summaries": {
+      "description": "Aggregated KSAB gap scores by department — computed view for scorecards",
+      "columns": {
+        "summary_id": { "type": "uuid", "pk": true },
+        "department_id": { "type": "string", "fk": "departments.department_id" },
+        "assessment_period": { "type": "string", "example": "FY2026" },
+        "competency_id": { "type": "string", "fk": "competency_definitions.competency_id" },
+        "avg_gap_score": { "type": "number", "example": 1.3 },
+        "pct_at_target": { "type": "number", "description": "% of assessed staff at or above target", "example": 62 },
+        "staff_assessed": { "type": "integer", "example": 28 },
+        "priority": { "type": "enum", "values": ["critical", "high", "medium", "low"] },
+        "created_at": { "type": "timestamp" }
+      }
+    }
+  },
+
+  "example_rows": {
+    "competency_definitions": [
+      {
+        "competency_id": "CS-K1",
+        "department_id": null,
+        "category": "Core",
+        "name": "County services catalog knowledge",
+        "ksab_domain": "knowledge",
+        "target_level_frontline": 4,
+        "target_level_supervisor": 4,
+        "linked_kpi_ids": ["customer_fcr", "customer_wait_time"],
+        "gap_signal": "Low first-contact resolution rate",
+        "assessment_methods": ["knowledge_test", "structured_interview"]
+      }
+    ],
+    "competency_assessments": [
+      {
+        "employee_id": "emp-001",
+        "competency_id": "CS-K1",
+        "assessed_level": 2,
+        "target_level": 4,
+        "gap_score": 2,
+        "assessment_method": "knowledge_test",
+        "assessment_date": "2026-02-15"
+      }
+    ]
+  },
+
+  "security_notes": [
+    "Employee PII (name, demographics) stored only in HR system of record — never in KPI/competency system.",
+    "Assessment data is confidential — accessible only to employee, supervisor, and HR.",
+    "Aggregate department gap summaries may be shared with leadership; individual data never shared beyond direct chain.",
+    "All assessment data retained per county records retention schedule.",
+    "Role-based access: employees see own data; supervisors see direct reports; HR sees department; executives see aggregates only."
+  ]
+}

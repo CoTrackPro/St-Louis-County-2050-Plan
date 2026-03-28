@@ -1,0 +1,228 @@
+{
+  "$schema": "API Routes — STL County KPI Platform",
+  "version": "1.0.0",
+  "base_url": "/api/v1",
+  "auth": "Bearer token (JWT) — roles: admin, department_head, analyst, public",
+
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/departments",
+      "description": "List all departments",
+      "auth_required": false,
+      "query_params": {
+        "include_kpis": { "type": "boolean", "default": false, "description": "Include KPI summary for each department" }
+      },
+      "response": "Department[]"
+    },
+    {
+      "method": "GET",
+      "path": "/departments/:department_id",
+      "description": "Get department details with current KPI snapshot",
+      "auth_required": false,
+      "response": "Department with KPISummary[]"
+    },
+    {
+      "method": "GET",
+      "path": "/kpis",
+      "description": "List all KPI definitions",
+      "auth_required": false,
+      "query_params": {
+        "department_id": { "type": "string", "description": "Filter by department" },
+        "category": { "type": "enum", "values": ["efficiency", "effectiveness", "equity", "economy", "satisfaction"] },
+        "is_active": { "type": "boolean", "default": true }
+      },
+      "response": "KPIDefinition[]"
+    },
+    {
+      "method": "GET",
+      "path": "/kpis/:kpi_id",
+      "description": "Get KPI definition with latest measurement and trend",
+      "auth_required": false,
+      "response": "KPIDefinition with latest KPIMeasurement and trend data"
+    },
+    {
+      "method": "POST",
+      "path": "/kpis",
+      "description": "Create a new KPI definition",
+      "auth_required": true,
+      "roles": ["admin"],
+      "body": "KPIDefinition (without kpi_id, timestamps)",
+      "response": "KPIDefinition"
+    },
+    {
+      "method": "PUT",
+      "path": "/kpis/:kpi_id",
+      "description": "Update KPI definition (target, thresholds, etc.)",
+      "auth_required": true,
+      "roles": ["admin", "department_head"],
+      "body": "Partial<KPIDefinition>",
+      "response": "KPIDefinition"
+    },
+    {
+      "method": "GET",
+      "path": "/kpis/:kpi_id/measurements",
+      "description": "Get historical measurements for a KPI",
+      "auth_required": false,
+      "query_params": {
+        "start_date": { "type": "date", "description": "Period start filter" },
+        "end_date": { "type": "date", "description": "Period end filter" },
+        "limit": { "type": "integer", "default": 12, "max": 60 },
+        "include_disaggregated": { "type": "boolean", "default": false }
+      },
+      "response": "KPIMeasurement[]"
+    },
+    {
+      "method": "POST",
+      "path": "/kpis/:kpi_id/measurements",
+      "description": "Submit a new KPI measurement",
+      "auth_required": true,
+      "roles": ["admin", "department_head", "analyst"],
+      "body": {
+        "period_start": "date",
+        "period_end": "date",
+        "value": "number",
+        "numerator": "number (optional)",
+        "denominator": "number (optional)",
+        "data_quality": "enum",
+        "notes": "string (optional)",
+        "disaggregated": "DisaggregatedMeasurement[] (optional)"
+      },
+      "response": "KPIMeasurement",
+      "notes": "Validates against duplicate period. Triggers alert check."
+    },
+    {
+      "method": "GET",
+      "path": "/kpis/:kpi_id/benchmarks",
+      "description": "Get national/peer benchmarks for a KPI",
+      "auth_required": false,
+      "response": "Benchmark[]"
+    },
+    {
+      "method": "GET",
+      "path": "/scorecards/:department_id",
+      "description": "Generate department scorecard (computed view)",
+      "auth_required": false,
+      "query_params": {
+        "period": { "type": "string", "description": "YYYY-MM or YYYY-QN", "example": "2026-Q1" },
+        "format": { "type": "enum", "values": ["json", "markdown", "pdf"], "default": "json" }
+      },
+      "response": "Scorecard object with KPIs, initiatives, trends, equity data"
+    },
+    {
+      "method": "GET",
+      "path": "/scorecards",
+      "description": "Generate county-wide scorecard summary",
+      "auth_required": false,
+      "query_params": {
+        "period": { "type": "string" },
+        "format": { "type": "enum", "values": ["json", "markdown", "pdf"], "default": "json" }
+      },
+      "response": "CountyScorecard with department summaries"
+    },
+    {
+      "method": "GET",
+      "path": "/initiatives",
+      "description": "List improvement initiatives",
+      "auth_required": false,
+      "query_params": {
+        "department_id": { "type": "string" },
+        "status": { "type": "enum", "values": ["planning", "in_progress", "complete", "blocked", "cancelled"] },
+        "impact": { "type": "enum", "values": ["high", "medium", "low"] }
+      },
+      "response": "Initiative[]"
+    },
+    {
+      "method": "POST",
+      "path": "/initiatives",
+      "description": "Create a new improvement initiative",
+      "auth_required": true,
+      "roles": ["admin", "department_head"],
+      "body": "Initiative (without initiative_id, timestamps)",
+      "response": "Initiative"
+    },
+    {
+      "method": "PUT",
+      "path": "/initiatives/:initiative_id",
+      "description": "Update initiative status, milestones",
+      "auth_required": true,
+      "roles": ["admin", "department_head", "analyst"],
+      "body": "Partial<Initiative>",
+      "response": "Initiative"
+    },
+    {
+      "method": "GET",
+      "path": "/initiatives/:initiative_id/milestones",
+      "description": "Get milestones for an initiative",
+      "auth_required": false,
+      "response": "Milestone[]"
+    },
+    {
+      "method": "GET",
+      "path": "/alerts",
+      "description": "Get active KPI alerts (yellow and red thresholds)",
+      "auth_required": true,
+      "roles": ["admin", "department_head", "analyst"],
+      "query_params": {
+        "department_id": { "type": "string" },
+        "severity": { "type": "enum", "values": ["yellow", "red"] },
+        "acknowledged": { "type": "boolean" }
+      },
+      "response": "Alert[]"
+    },
+    {
+      "method": "POST",
+      "path": "/alerts/:alert_id/acknowledge",
+      "description": "Acknowledge an alert with action plan reference",
+      "auth_required": true,
+      "roles": ["admin", "department_head"],
+      "body": { "notes": "string", "initiative_id": "uuid (optional)" },
+      "response": "Alert"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/council-briefing",
+      "description": "Generate council briefing report",
+      "auth_required": true,
+      "roles": ["admin"],
+      "query_params": {
+        "period": { "type": "string" },
+        "format": { "type": "enum", "values": ["json", "markdown", "pdf", "docx"], "default": "markdown" }
+      },
+      "response": "CouncilBriefing"
+    },
+    {
+      "method": "GET",
+      "path": "/reports/equity",
+      "description": "Generate equity analysis report across departments",
+      "auth_required": false,
+      "query_params": {
+        "dimension": { "type": "string", "example": "geographic_zone" },
+        "period": { "type": "string" }
+      },
+      "response": "EquityReport"
+    },
+    {
+      "method": "GET",
+      "path": "/export",
+      "description": "Bulk export KPI data for open data portal",
+      "auth_required": false,
+      "query_params": {
+        "format": { "type": "enum", "values": ["csv", "json"], "default": "csv" },
+        "department_id": { "type": "string" },
+        "start_date": { "type": "date" },
+        "end_date": { "type": "date" }
+      },
+      "response": "CSV or JSON file download"
+    }
+  ],
+
+  "security_notes": [
+    "Public endpoints return only published KPI data — no PII, no draft data.",
+    "Write operations require authentication and role-based authorization.",
+    "Rate limiting: 100 req/min for authenticated, 30 req/min for public.",
+    "All inputs validated and sanitized. SQL injection prevention via parameterized queries.",
+    "Audit log for all write operations (who changed what, when).",
+    "CORS configured for county domains only."
+  ]
+}

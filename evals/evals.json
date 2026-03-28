@@ -1,0 +1,120 @@
+{
+  "skill_name": "stl-county-kpi",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Generate a scorecard for the St. Louis County Permits & Licensing department. Use illustrative data.",
+      "expected_output": "A formatted department scorecard with 6 KPIs, trend data, active initiatives, equity check, and next period priorities. All values labeled as illustrative."
+    },
+    {
+      "id": 2,
+      "prompt": "The county's Qless wait times have increased 25% since Friday closures. Build me a 90-day action plan to reduce wait times back to pre-closure levels.",
+      "expected_output": "A structured action plan using the template with root cause analysis (Friday closure → compressed hours → higher utilization), SMART goal, 3-4 interventions ranked by impact×feasibility, 90-day milestones, resource requirements, and measurement plan."
+    },
+    {
+      "id": 3,
+      "prompt": "Prepare a council briefing summarizing county government performance for Q1 2026. Include all departments.",
+      "expected_output": "A 2-page executive briefing with headline metric, department summary table with status indicators, wins, areas requiring attention with root cause and action, recommended actions with fiscal impact, and methodology appendix."
+    },
+    {
+      "id": 4,
+      "prompt": "How does St. Louis County Animal Shelter compare to national benchmarks? What should they prioritize?",
+      "expected_output": "Comparison of STL County shelter KPIs (live release, adoption rate, avg stay, return-to-owner) against Best Friends Animal Society and ICMA benchmarks, with specific improvement recommendations prioritized by gap size and feasibility."
+    },
+    {
+      "id": 5,
+      "prompt": "Build a React dashboard artifact showing KPIs for St. Louis County's top 6 departments.",
+      "expected_output": "A functional React JSX artifact with department selector, KPI cards showing value/target/trend/status, sparkline charts, and initiative tracking. Uses Recharts, Tailwind, and the color palette from the dashboard spec."
+    },
+    {
+      "id": 6,
+      "prompt": "What's the data model I'd need to build a KPI tracking platform for St. Louis County?",
+      "expected_output": "Presentation of the kpi-data-model.json schema with tables for departments, kpi_definitions, kpi_measurements, disaggregated measurements, initiatives, milestones, and benchmarks. Includes example rows and relationship explanations."
+    },
+    {
+      "id": 7,
+      "prompt": "St. Louis County just closed West County Government Center and eliminated Friday hours. What KPIs should we watch to measure the impact?",
+      "expected_output": "Identification of impacted KPIs across Customer Service (wait times, channel distribution, CSAT), Revenue (call wait, online payment adoption), Permits (online submission rate, backlog), and recommendations for new tracking metrics (location-specific utilization, digital adoption acceleration)."
+    },
+    {
+      "id": 8,
+      "prompt": "Our permit processing time is stuck at 12 days despite sending staff to a 2-day code training. What's going on? Do a KSAB gap analysis.",
+      "expected_output": "A KSAB gap analysis report that identifies the likely root domain is Behavior (not Knowledge) — staff know the code but aren't consistently completing reviews within SLA. Should diagnose using system data and supervisor observation, not more classroom training. Recommends process redesign, visual management dashboards, and accountability mechanisms instead of additional knowledge training."
+    },
+    {
+      "id": 9,
+      "prompt": "Build a training needs assessment for the Customer Service division. They lost Friday hours, West County closed, and CSAT dropped from 4.1 to 3.6.",
+      "expected_output": "A complete TNA covering: organizational context (service hour reduction, location closures), needs identification from KPI data (CSAT drop, wait time increase, FCR decline), KSAB diagnosis (likely S+B gaps in triage speed, digital promotion behavior, and multi-channel communication), prioritized training plan with Tier 1/2/3, budget summary, and Kirkpatrick evaluation plan."
+    },
+    {
+      "id": 10,
+      "prompt": "Create an individual development plan for a Revenue Department front-line employee who scores well on knowledge tests but has a high error rate on payment processing and doesn't promote online payments to callers.",
+      "expected_output": "An IDP that correctly identifies Behavior gaps (not Knowledge) — employee knows the procedures but doesn't consistently execute. Goals should focus on coached practice, nudge design, supervisor 1:1 feedback, and process redesign. Should NOT prescribe more classroom training. Includes check-in schedule and KPI-linked measurement."
+    },
+    {
+      "id": 11,
+      "prompt": "The police department's use-of-force rate isn't improving even after crisis intervention training. Diagnose using the KSAB framework.",
+      "expected_output": "A nuanced diagnosis that distinguishes between K (do officers know de-escalation techniques?), S (can they execute under stress?), A (do they believe de-escalation works / guardian mindset?), and B (do they consistently apply it in the field?). Should reference PD-K2, PD-S1, PD-A1, PD-A2 competencies. Should recommend simulation-based practice for S gaps, leadership modeling and peer norms for A gaps, and body camera review with constructive feedback for B gaps. Uses evidence-based, non-inflammatory language."
+    },
+    {
+      "id": 12,
+      "prompt": "What workforce KPIs should St. Louis County track, and how do they compare to national benchmarks?",
+      "expected_output": "Presentation of 10 workforce KPIs (vacancy rate, time to fill, turnover, first-year turnover, training hours, training completion, competency gap score, training ROI, engagement, internal promotion rate) with definitions, targets, and comparison to ICMA/SHRM/ATD benchmarks from the benchmark-data.csv."
+    },
+    {
+      "id": 13,
+      "prompt": "Three senior assessors in Revenue are retiring in the next 18 months and they're the only ones who know the commercial property valuation process. Build a knowledge transfer plan.",
+      "expected_output": "A succession risk assessment scoring high (retirement <3 years, mission-critical role, tribal knowledge, hard to recruit). Recommends: documentation sprint with facilitator, paired assignments with junior staff, video capture of complex valuations, decision log for 6 months, cross-training rotation. Links to Assessment Error Rate KPI and should flag that this is a Knowledge preservation need, not a training program."
+    },
+    {
+      "id": 14,
+      "prompt": "A homeowner says it took them 2 months and 12 separate contacts to get a deck permit approved. Map this journey and show me where the breakdowns are.",
+      "expected_output": "Loads constituent-journeys.md Journey 1 (Homeowner Building Project). Maps the 5-stage journey (research → pre-check → application → review → inspection), identifies likely handoff failures (Pattern 3: Eligibility Maze between Planning and Permits, Pattern 1: Referral Black Hole on incomplete application follow-up), presents end-to-end journey KPIs showing 50-day actual vs 30-day target, and recommends unified intake portal, pre-application checklist, and automatic status notifications."
+    },
+    {
+      "id": 15,
+      "prompt": "Where does St. Louis County's actual KPI data come from? I want to connect real data sources to a dashboard.",
+      "expected_output": "Loads data-sources.md. Maps KPIs to real sources: county open data portal (Socrata API at data.stlouisco.com), Qless API for wait times, permit management system timestamps, tax collection system, Census ACS API (FIPS 29-189), FBI UCR Crime Data Explorer, HMIS for homeless data, ShowMeVax for immunizations. Includes data integration architecture diagram and ETL frequency recommendations. Provides SQL templates for data quality audits."
+    },
+    {
+      "id": 16,
+      "prompt": "Build a 90-day onboarding plan for a new Customer Service Representative at St. Louis County. They start next Monday.",
+      "expected_output": "Loads onboarding-curriculum.md Section 3.1. Produces a day-by-day plan for weeks 1-4 and week-by-week for weeks 5-12. Follows KSAB dependency chain: Week 1-2 knowledge foundation (services catalog, Qless, phone system), Week 3 guided practice (triage simulation, supervised calls), Week 4 solo with safety net. Includes assessment checkpoints at Day 5/14/30/60/90. Day 90 success criteria: services quiz ≥90%, FCR ≥65%, CRM compliance ≥90%, digital self-service offered ≥80% of interactions. Assigns buddy and mentor."
+    },
+    {
+      "id": 17,
+      "prompt": "We have 150,000 seniors in the county but only 3,800 applied for the Senior Tax Freeze. Map the senior services journey and tell me why uptake is so low.",
+      "expected_output": "Loads constituent-journeys.md Journey 5 (Senior Services Navigation). Identifies awareness gap as primary barrier — only ~2.5% of eligible seniors applying. Maps the 4-stage journey (awareness → enrollment → ongoing access → crisis), shows departments touched (Revenue → Human Services → Parks → Health → Customer Service). Diagnoses handoff failures: no proactive outreach to eligible seniors, no cross-enrollment when seniors contact one department, no senior-dedicated service channel. Recommends annual senior benefits checkup via mail to all 65+ property owners, Senior Services Hotline, and pre-populated Tax Freeze applications."
+    },
+    {
+      "id": 18,
+      "prompt": "/triage — A caller says 'I need to register my car.' What do I tell them?",
+      "expected_output": "Loads employee-toolkit.md Section 1 (triage tree). Routes to 'Services That Are NOT County' — vehicle registration is handled by Missouri Department of Revenue (state), not St. Louis County. Provides redirect: dor.mo.gov or nearest license office. Includes the script: 'That's actually handled by the state, not the county. You'll want to go to your nearest license office or visit dor.mo.gov. Would you like me to help with anything else?'"
+    },
+    {
+      "id": 19,
+      "prompt": "I just moved to St. Louis County. What do I need to do?",
+      "expected_output": "Loads resident-service-guides.md Section 1.1 ('I Just Moved'). Provides ordered checklist: property taxes (nothing to do now, bill comes in November), personal property declaration (file by March 1), voter registration (sos.mo.gov, 3 minutes), parks & rec programs, pet license if applicable. Clarifies what is NOT county (vehicle registration, utilities, trash in municipalities). Gives one link to bookmark: stlouiscountymo.gov."
+    },
+    {
+      "id": 20,
+      "prompt": "/script angry — A taxpayer is yelling at me about their assessment being too high. Give me a script.",
+      "expected_output": "Loads employee-toolkit.md Section 7 (Difficult Interaction Playbook). Uses LEAD framework: Listen (let them finish, don't interrupt), Empathize ('I understand why that would be upsetting'), Ask ('What would be the best outcome for you today?'), Do ('Here's what I can do: I can explain how the assessment was calculated, and if you disagree, you have the right to appeal through the Board of Equalization'). Does NOT argue about the assessment value. Offers concrete next step."
+    },
+    {
+      "id": 21,
+      "prompt": "/eligible tax-freeze — Am I eligible for the Senior Tax Freeze? I'm 64 and own my home.",
+      "expected_output": "Loads resident-service-guides.md Section 2.1 (Senior Tax Freeze Eligibility). Walks through decision tree: Age 62+? YES. Own the property? YES. Primary residence? [Ask]. Income below threshold? [Ask]. Gives preliminary 'you may be eligible' based on age and ownership, with remaining questions to confirm. Provides application URL, required documents, and application period dates."
+    },
+    {
+      "id": 22,
+      "prompt": "Generate a printable job aid card for the customer service desk — triage routing and common referrals.",
+      "expected_output": "Loads employee-toolkit.md Section 10. Produces a one-page printable reference card with: Front side = simplified triage decision tree (5 main branches: Pay, Document, Build, Help, Register + Not-Us column). Back side = top 10 state-vs-county confusion items + Qless instructions + escalation contacts. Formatted for lamination. Uses pdf skill to generate."
+    },
+    {
+      "id": 23,
+      "prompt": "/web-content senior-tax-freeze — Write website copy for the Senior Tax Freeze page. Plain language, mobile-friendly.",
+      "expected_output": "Generates web-ready content at 8th-grade reading level. Includes: H1 title, 2-sentence plain-language description, eligibility checklist (bullet points), step-by-step 'How to Apply' with numbered steps, required documents list, deadlines, FAQ (3-4 questions), call-to-action button text ('Apply Now' + 'Check Eligibility'). No jargon, active voice, short sentences. Mobile-scannable format."
+    }
+  ]
+}

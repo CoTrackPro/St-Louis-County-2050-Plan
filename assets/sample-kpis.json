@@ -1,0 +1,68 @@
+[
+  {
+    "kpi_id": "permits_avg_processing",
+    "department_id": "permits",
+    "name": "Avg Permit Processing Time",
+    "value": 12.3,
+    "target": 10,
+    "unit": "days",
+    "prior": 13.4,
+    "direction": "lower_is_better",
+    "sparkline": [15.1, 14.2, 13.8, 13.1, 12.7, 12.3]
+  },
+  {
+    "kpi_id": "permits_online_adoption",
+    "department_id": "permits",
+    "name": "Online Submission Rate",
+    "value": 67,
+    "target": 85,
+    "unit": "%",
+    "prior": 59,
+    "direction": "higher_is_better",
+    "sparkline": [42, 48, 51, 55, 59, 67]
+  },
+  {
+    "kpi_id": "permits_first_pass",
+    "department_id": "permits",
+    "name": "First-Pass Approval Rate",
+    "value": 74,
+    "target": 80,
+    "unit": "%",
+    "prior": 71,
+    "direction": "higher_is_better",
+    "sparkline": [68, 69, 70, 71, 72, 74]
+  },
+  {
+    "kpi_id": "permits_backlog",
+    "department_id": "permits",
+    "name": "Pending Application Backlog",
+    "value": 342,
+    "target": 200,
+    "unit": "apps",
+    "prior": 390,
+    "direction": "lower_is_better",
+    "sparkline": [410, 405, 395, 390, 370, 342]
+  },
+  {
+    "kpi_id": "permits_inspector_util",
+    "department_id": "permits",
+    "name": "Inspector Utilization",
+    "value": 88,
+    "target": 90,
+    "unit": "%",
+    "prior": 86,
+    "direction": "higher_is_better",
+    "sparkline": [82, 84, 85, 85, 86, 88]
+  },
+  {
+    "kpi_id": "permits_revenue",
+    "department_id": "permits",
+    "name": "Permit Revenue (QTD)",
+    "value": 2.4,
+    "target": 2.8,
+    "unit": "M",
+    "prior": 2.3,
+    "direction": "higher_is_better",
+    "sparkline": [2.1, 2.1, 2.2, 2.3, 2.3, 2.4]
+  }
+]

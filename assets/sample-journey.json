@@ -1,0 +1,44 @@
+[
+  {
+    "journey_id": "BP-2026-001",
+    "journey_type": "building_project",
+    "start_date": "2026-01-10",
+    "end_date": "2026-03-05",
+    "outcome": "completed",
+    "touchpoints": [
+      {"step": 1, "department": "customer", "action": "Called county — asked about deck permit", "date": "2026-01-10", "channel": "phone", "resolved": false, "handoff_to": "permits", "handoff_confirmed": false, "wait_minutes": 12, "service_minutes": 8},
+      {"step": 2, "department": "permits", "action": "Called permits — told to check zoning first", "date": "2026-01-13", "channel": "phone", "resolved": false, "handoff_to": "planning", "handoff_confirmed": false, "was_misdirected": true, "wait_minutes": 18},
+      {"step": 3, "department": "planning", "action": "Walk-in zoning check — approved", "date": "2026-01-22", "channel": "walk_in", "resolved": true, "wait_minutes": 45, "service_minutes": 10},
+      {"step": 4, "department": "permits", "action": "Submitted permit online — incomplete, returned", "date": "2026-01-28", "channel": "online", "resolved": false},
+      {"step": 5, "department": "permits", "action": "Resubmitted with corrected plans", "date": "2026-02-04", "channel": "online", "resolved": false},
+      {"step": 6, "department": "permits", "action": "Approved — paid fees online", "date": "2026-02-14", "channel": "online", "resolved": true},
+      {"step": 7, "department": "permits", "action": "Inspection scheduled", "date": "2026-02-25", "channel": "phone", "resolved": true, "wait_minutes": 5},
+      {"step": 8, "department": "permits", "action": "Inspection passed — permit closed", "date": "2026-03-05", "channel": "in_person", "resolved": true}
+    ]
+  },
+  {
+    "journey_id": "BP-2026-002",
+    "journey_type": "building_project",
+    "start_date": "2026-02-01",
+    "end_date": null,
+    "outcome": "dropped_off",
+    "touchpoints": [
+      {"step": 1, "department": "customer", "action": "Walk-in inquiry about basement finish", "date": "2026-02-01", "channel": "walk_in", "resolved": false, "handoff_to": "permits", "handoff_confirmed": false, "wait_minutes": 35},
+      {"step": 2, "department": "permits", "action": "Called — told needs plans from architect", "date": "2026-02-10", "channel": "phone", "resolved": false, "wait_minutes": 22},
+      {"step": 3, "department": "permits", "action": "Submitted plans — rejected, missing structural calcs", "date": "2026-03-01", "channel": "online", "resolved": false}
+    ]
+  },
+  {
+    "journey_id": "BP-2026-003",
+    "journey_type": "building_project",
+    "start_date": "2026-01-15",
+    "end_date": "2026-02-10",
+    "outcome": "completed",
+    "touchpoints": [
+      {"step": 1, "department": "planning", "action": "Called — zoning check (knew to do this first)", "date": "2026-01-15", "channel": "phone", "resolved": true, "wait_minutes": 8, "service_minutes": 5},
+      {"step": 2, "department": "permits", "action": "Submitted permit online — complete application", "date": "2026-01-20", "channel": "online", "resolved": false},
+      {"step": 3, "department": "permits", "action": "Approved first pass", "date": "2026-01-28", "channel": "online", "resolved": true},
+      {"step": 4, "department": "permits", "action": "Inspection passed", "date": "2026-02-10", "channel": "in_person", "resolved": true}
+    ]
+  }
+]
