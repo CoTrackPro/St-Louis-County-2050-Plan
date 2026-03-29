@@ -14,14 +14,14 @@ Input CSV columns: kpi_id, period_start, period_end, value, data_quality
 Input JSON: array of objects with same fields
 """
 
-import json
-import sys
-import csv
 import argparse
-from datetime import datetime, timedelta
-from collections import defaultdict
-from typing import Any
+import contextlib
+import csv
+import json
 import math
+import sys
+from collections import defaultdict
+from datetime import datetime
 
 
 def load_csv(path: str) -> list[dict]:
@@ -31,10 +31,8 @@ def load_csv(path: str) -> list[dict]:
         for row in reader:
             for num_field in ("value",):
                 if num_field in row and row[num_field]:
-                    try:
+                    with contextlib.suppress(ValueError):
                         row[num_field] = float(row[num_field])
-                    except ValueError:
-                        pass
             rows.append(row)
         return rows
 
@@ -55,33 +53,35 @@ def check_completeness(measurements: list[dict]) -> dict:
         # Check for null/missing values
         nulls = [r for r in records if r.get("value") is None or r.get("value") == ""]
         if nulls:
-            issues.append({
-                "check": "null_values",
-                "severity": "high",
-                "kpi_id": kpi_id,
-                "count": len(nulls),
-                "message": f"{kpi_id}: {len(nulls)} records with null/empty value",
-            })
+            issues.append(
+                {
+                    "check": "null_values",
+                    "severity": "high",
+                    "kpi_id": kpi_id,
+                    "count": len(nulls),
+                    "message": f"{kpi_id}: {len(nulls)} records with null/empty value",
+                }
+            )
 
         # Check for missing periods (assumes monthly)
         dates = []
         for r in records:
-            try:
+            with contextlib.suppress(ValueError, TypeError):
                 dates.append(datetime.strptime(r.get("period_start", ""), "%Y-%m-%d"))
-            except (ValueError, TypeError):
-                pass
 
         if len(dates) >= 2:
             dates.sort()
             for i in range(1, len(dates)):
                 gap_days = (dates[i] - dates[i - 1]).days
                 if gap_days > 45:  # More than ~1.5 months gap
-                    issues.append({
-                        "check": "missing_period",
-                        "severity": "medium",
-                        "kpi_id": kpi_id,
-                        "message": f"{kpi_id}: Gap of {gap_days} days between {dates[i-1].strftime('%Y-%m-%d')} and {dates[i].strftime('%Y-%m-%d')}",
-                    })
+                    issues.append(
+                        {
+                            "check": "missing_period",
+                            "severity": "medium",
+                            "kpi_id": kpi_id,
+                            "message": f"{kpi_id}: Gap of {gap_days} days between {dates[i - 1].strftime('%Y-%m-%d')} and {dates[i].strftime('%Y-%m-%d')}",
+                        }
+                    )
 
     return {
         "check_name": "completeness",
@@ -112,24 +112,28 @@ def check_staleness(measurements: list[dict], max_stale_days: int = 45) -> dict:
                 pass
 
         if latest is None:
-            issues.append({
-                "check": "no_valid_dates",
-                "severity": "high",
-                "kpi_id": kpi_id,
-                "message": f"{kpi_id}: No valid date found in any record",
-            })
+            issues.append(
+                {
+                    "check": "no_valid_dates",
+                    "severity": "high",
+                    "kpi_id": kpi_id,
+                    "message": f"{kpi_id}: No valid date found in any record",
+                }
+            )
         else:
             stale_days = (today - latest).days
             if stale_days > max_stale_days:
                 severity = "high" if stale_days > 90 else "medium"
-                issues.append({
-                    "check": "stale_data",
-                    "severity": severity,
-                    "kpi_id": kpi_id,
-                    "days_stale": stale_days,
-                    "latest_date": latest.strftime("%Y-%m-%d"),
-                    "message": f"{kpi_id}: Data is {stale_days} days old (latest: {latest.strftime('%Y-%m-%d')})",
-                })
+                issues.append(
+                    {
+                        "check": "stale_data",
+                        "severity": severity,
+                        "kpi_id": kpi_id,
+                        "days_stale": stale_days,
+                        "latest_date": latest.strftime("%Y-%m-%d"),
+                        "message": f"{kpi_id}: Data is {stale_days} days old (latest: {latest.strftime('%Y-%m-%d')})",
+                    }
+                )
 
     return {
         "check_name": "staleness",
@@ -171,17 +175,19 @@ def check_outliers(measurements: list[dict], z_threshold: float = 2.5) -> dict:
             if isinstance(v, (int, float)):
                 z_score = abs(v - mean) / std
                 if z_score > z_threshold:
-                    issues.append({
-                        "check": "outlier",
-                        "severity": "medium",
-                        "kpi_id": kpi_id,
-                        "period": r.get("period_start", ""),
-                        "value": v,
-                        "mean": round(mean, 2),
-                        "std": round(std, 2),
-                        "z_score": round(z_score, 2),
-                        "message": f"{kpi_id}: Value {v} on {r.get('period_start', '?')} is {round(z_score, 1)} std devs from mean ({round(mean, 1)})",
-                    })
+                    issues.append(
+                        {
+                            "check": "outlier",
+                            "severity": "medium",
+                            "kpi_id": kpi_id,
+                            "period": r.get("period_start", ""),
+                            "value": v,
+                            "mean": round(mean, 2),
+                            "std": round(std, 2),
+                            "z_score": round(z_score, 2),
+                            "message": f"{kpi_id}: Value {v} on {r.get('period_start', '?')} is {round(z_score, 1)} std devs from mean ({round(mean, 1)})",
+                        }
+                    )
 
     return {
         "check_name": "outliers",
@@ -202,14 +208,16 @@ def check_duplicates(measurements: list[dict]) -> dict:
 
     for (kpi_id, period), count in seen.items():
         if count > 1:
-            issues.append({
-                "check": "duplicate",
-                "severity": "high",
-                "kpi_id": kpi_id,
-                "period": period,
-                "count": count,
-                "message": f"{kpi_id}: {count} records for period {period}",
-            })
+            issues.append(
+                {
+                    "check": "duplicate",
+                    "severity": "high",
+                    "kpi_id": kpi_id,
+                    "period": period,
+                    "count": count,
+                    "message": f"{kpi_id}: {count} records for period {period}",
+                }
+            )
 
     return {
         "check_name": "duplicates",
@@ -232,36 +240,42 @@ def check_range(measurements: list[dict]) -> dict:
 
         # Negative values for things that shouldn't be negative
         if v < 0 and unit in ("%", "days", "minutes", "hours", "rating_5"):
-            issues.append({
-                "check": "negative_value",
-                "severity": "high",
-                "kpi_id": kpi_id,
-                "period": m.get("period_start", ""),
-                "value": v,
-                "message": f"{kpi_id}: Negative value ({v}) for unit type '{unit}'",
-            })
+            issues.append(
+                {
+                    "check": "negative_value",
+                    "severity": "high",
+                    "kpi_id": kpi_id,
+                    "period": m.get("period_start", ""),
+                    "value": v,
+                    "message": f"{kpi_id}: Negative value ({v}) for unit type '{unit}'",
+                }
+            )
 
         # Percentage over 100
         if v > 100 and unit == "%":
-            issues.append({
-                "check": "over_100_pct",
-                "severity": "medium",
-                "kpi_id": kpi_id,
-                "period": m.get("period_start", ""),
-                "value": v,
-                "message": f"{kpi_id}: Value {v}% exceeds 100% — verify data",
-            })
+            issues.append(
+                {
+                    "check": "over_100_pct",
+                    "severity": "medium",
+                    "kpi_id": kpi_id,
+                    "period": m.get("period_start", ""),
+                    "value": v,
+                    "message": f"{kpi_id}: Value {v}% exceeds 100% — verify data",
+                }
+            )
 
         # Rating over scale max
         if v > 5 and unit == "rating_5":
-            issues.append({
-                "check": "over_scale",
-                "severity": "high",
-                "kpi_id": kpi_id,
-                "period": m.get("period_start", ""),
-                "value": v,
-                "message": f"{kpi_id}: Rating {v} exceeds 5-point scale",
-            })
+            issues.append(
+                {
+                    "check": "over_scale",
+                    "severity": "high",
+                    "kpi_id": kpi_id,
+                    "period": m.get("period_start", ""),
+                    "value": v,
+                    "message": f"{kpi_id}: Rating {v} exceeds 5-point scale",
+                }
+            )
 
     return {
         "check_name": "range_check",
@@ -286,12 +300,14 @@ def generate_report(results: list[dict]) -> str:
     ]
 
     # Summary table
-    lines.extend([
-        "## Summary",
-        "",
-        "| Check | Issues | Severity |",
-        "|-------|--------|----------|",
-    ])
+    lines.extend(
+        [
+            "## Summary",
+            "",
+            "| Check | Issues | Severity |",
+            "|-------|--------|----------|",
+        ]
+    )
     for r in results:
         severities = [i.get("severity", "?") for i in r.get("issues", [])]
         sev_str = f"{severities.count('high')} high, {severities.count('medium')} med" if severities else "—"
@@ -303,10 +319,12 @@ def generate_report(results: list[dict]) -> str:
     for r in results:
         if r["issue_count"] == 0:
             continue
-        lines.extend([
-            f"## {r['check_name'].replace('_', ' ').title()}",
-            "",
-        ])
+        lines.extend(
+            [
+                f"## {r['check_name'].replace('_', ' ').title()}",
+                "",
+            ]
+        )
         for i in r.get("issues", []):
             icon = "🔴" if i.get("severity") == "high" else "🟡"
             lines.append(f"- {icon} {i['message']}")
@@ -314,12 +332,16 @@ def generate_report(results: list[dict]) -> str:
 
     # Recommendations
     if total_issues > 0:
-        lines.extend([
-            "## Recommendations",
-            "",
-        ])
+        lines.extend(
+            [
+                "## Recommendations",
+                "",
+            ]
+        )
         if high > 0:
-            lines.append("- **Immediate**: Investigate and resolve all high-severity issues before next reporting cycle")
+            lines.append(
+                "- **Immediate**: Investigate and resolve all high-severity issues before next reporting cycle"
+            )
         if any(r["check_name"] == "staleness" and r["issue_count"] > 0 for r in results):
             lines.append("- **Process**: Review data collection schedules for stale KPIs; automate where possible")
         if any(r["check_name"] == "duplicates" and r["issue_count"] > 0 for r in results):

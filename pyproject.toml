@@ -1,0 +1,54 @@
+[project]
+name = "stl-county-kpi"
+version = "1.0.0"
+description = "AI-powered government performance, workforce development, and service delivery tools for St. Louis County, MO"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+# No runtime dependencies — standard library only
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "mypy",
+    "pytest",
+]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+src = ["scripts"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+]
+ignore = [
+    "E501",   # line length handled by formatter
+    "SIM108", # ternary operator — readability preference
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["scripts"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_unused_configs = true
+ignore_missing_imports = true
+# Relax strict checks for existing code; tighten incrementally
+check_untyped_defs = false
+disallow_untyped_defs = false
+warn_return_any = false
+no_implicit_optional = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]

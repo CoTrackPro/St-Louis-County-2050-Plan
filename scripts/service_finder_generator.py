@@ -10,14 +10,11 @@ Usage:
     python scripts/service_finder_generator.py --output service-finder.jsx
 """
 
-import json
-import sys
 import argparse
-from pathlib import Path
 
 
 def generate_service_finder() -> str:
-    return '''import { useState, useMemo } from "react";
+    return """import { useState, useMemo } from "react";
 
 const SERVICES = [
   { id: "tax-pay", keywords: ["pay tax", "property tax", "tax bill", "tax payment", "pay bill"], category: "Payments", title: "Pay Property Tax", dept: "Revenue", icon: "💰", online: true, url: "stlouiscountymo.gov/payments", steps: ["Look up your parcel number (on your tax bill or search by address)", "Go to stlouiscountymo.gov/payments", "Enter parcel number and payment info", "Get instant confirmation"], time: "2 min online", phone: "314-615-5000" },
@@ -187,7 +184,7 @@ export default function ServiceFinder() {
       </div>
     </div>
   );
-}'''
+}"""
 
 
 def main():

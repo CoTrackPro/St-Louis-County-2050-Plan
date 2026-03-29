@@ -21,11 +21,10 @@ Input actuals format (JSON):
 Benchmark CSV columns: kpi_id, kpi_name, department, unit, source, peer_group, year, p25, median, p75, best_in_class, notes
 """
 
+import argparse
+import csv
 import json
 import sys
-import csv
-import argparse
-from typing import Any
 
 
 def load_benchmarks(path: str) -> list[dict]:
@@ -96,11 +95,13 @@ def compare(actuals: list[dict], benchmarks: list[dict], department: str = None)
         bench = bench_lookup.get(kpi_id)
 
         if not bench:
-            results.append({
-                **actual,
-                "benchmark_found": False,
-                "message": f"No benchmark data found for {kpi_id}",
-            })
+            results.append(
+                {
+                    **actual,
+                    "benchmark_found": False,
+                    "message": f"No benchmark data found for {kpi_id}",
+                }
+            )
             continue
 
         if department and bench.get("department") != department:
@@ -150,27 +151,29 @@ def compare(actuals: list[dict], benchmarks: list[dict], department: str = None)
             else:
                 position = "🟢 Above Median" if value >= median else "🔴 Below Median"
 
-        results.append({
-            "kpi_id": kpi_id,
-            "kpi_name": bench.get("kpi_name", kpi_id),
-            "department": bench.get("department", ""),
-            "unit": bench.get("unit", ""),
-            "direction": direction,
-            "benchmark_found": True,
-            "actual_value": value,
-            "p25": p25,
-            "median": median,
-            "p75": p75,
-            "best_in_class": best,
-            "source": bench.get("source", ""),
-            "peer_group": bench.get("peer_group", ""),
-            "year": bench.get("year", ""),
-            "gap_to_median": round(gap_to_median, 2) if gap_to_median is not None else None,
-            "gap_to_best": round(gap_to_best, 2) if gap_to_best is not None else None,
-            "estimated_percentile": percentile,
-            "position": position,
-            "notes": bench.get("notes", ""),
-        })
+        results.append(
+            {
+                "kpi_id": kpi_id,
+                "kpi_name": bench.get("kpi_name", kpi_id),
+                "department": bench.get("department", ""),
+                "unit": bench.get("unit", ""),
+                "direction": direction,
+                "benchmark_found": True,
+                "actual_value": value,
+                "p25": p25,
+                "median": median,
+                "p75": p75,
+                "best_in_class": best,
+                "source": bench.get("source", ""),
+                "peer_group": bench.get("peer_group", ""),
+                "year": bench.get("year", ""),
+                "gap_to_median": round(gap_to_median, 2) if gap_to_median is not None else None,
+                "gap_to_best": round(gap_to_best, 2) if gap_to_best is not None else None,
+                "estimated_percentile": percentile,
+                "position": position,
+                "notes": bench.get("notes", ""),
+            }
+        )
 
     return results
 
@@ -211,14 +214,16 @@ def generate_report(results: list[dict]) -> str:
         by_dept[dept].append(r)
 
     for dept, dept_results in sorted(by_dept.items()):
-        lines.extend([
-            "---",
-            "",
-            f"## {dept.replace('_', ' ').title()}",
-            "",
-            "| KPI | STL County | Median | P25 | P75 | Best | %ile | Position | Source |",
-            "|-----|-----------|--------|-----|-----|------|------|----------|--------|",
-        ])
+        lines.extend(
+            [
+                "---",
+                "",
+                f"## {dept.replace('_', ' ').title()}",
+                "",
+                "| KPI | STL County | Median | P25 | P75 | Best | %ile | Position | Source |",
+                "|-----|-----------|--------|-----|-----|------|------|----------|--------|",
+            ]
+        )
 
         for r in sorted(dept_results, key=lambda x: x.get("estimated_percentile", 50)):
             unit = r.get("unit", "")
@@ -238,22 +243,25 @@ def generate_report(results: list[dict]) -> str:
 
     # Improvement priorities (bottom quartile and below median)
     priorities = sorted(
-        [r for r in found if r.get("estimated_percentile", 50) < 50],
-        key=lambda x: x.get("estimated_percentile", 50)
+        [r for r in found if r.get("estimated_percentile", 50) < 50], key=lambda x: x.get("estimated_percentile", 50)
     )
 
     if priorities:
-        lines.extend([
-            "---",
-            "",
-            "## Improvement Priorities (Below Median)",
-            "",
-            "Ranked by distance from peer median, worst first:",
-            "",
-        ])
+        lines.extend(
+            [
+                "---",
+                "",
+                "## Improvement Priorities (Below Median)",
+                "",
+                "Ranked by distance from peer median, worst first:",
+                "",
+            ]
+        )
         for i, r in enumerate(priorities, 1):
             gap = r.get("gap_to_median", 0)
-            direction = "need to reduce by" if r.get("direction") == "lower_is_better" and gap < 0 else "need to improve by"
+            direction = (
+                "need to reduce by" if r.get("direction") == "lower_is_better" and gap < 0 else "need to improve by"
+            )
             if r.get("direction") == "lower_is_better":
                 direction = "need to reduce by" if gap < 0 else "ahead by"
             else:
@@ -270,12 +278,14 @@ def generate_report(results: list[dict]) -> str:
 
     # Not found
     if not_found:
-        lines.extend([
-            "---",
-            "",
-            "## KPIs Without Benchmark Data",
-            "",
-        ])
+        lines.extend(
+            [
+                "---",
+                "",
+                "## KPIs Without Benchmark Data",
+                "",
+            ]
+        )
         for r in not_found:
             lines.append(f"- {r.get('kpi_id', '?')}: {r.get('message', 'No benchmark found')}")
         lines.append("")

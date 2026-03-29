@@ -1,5 +1,9 @@
 # stl-county-kpi
 
+[![CI](https://github.com/dougdevitre/st-louis-county-2050-plan/actions/workflows/ci.yml/badge.svg)](https://github.com/dougdevitre/st-louis-county-2050-plan/actions/workflows/ci.yml)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 **AI-powered operating system for St. Louis County, Missouri government performance, workforce development, and resident service delivery.**
 
 A Claude skill that helps county employees measure, report, and improve government services — and helps residents navigate the services they need.
@@ -133,9 +137,17 @@ The skill doesn't just measure performance — it provides the actual scripts, d
 
 See [FORK_GUIDE.md](FORK_GUIDE.md) for step-by-step instructions on adapting this skill to any county in the US. The patterns are universal — you customize the departments, KPI targets, legal context, and contact info.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding KPIs, departments, scripts, and more.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for vulnerability reporting.
+
 ## License
 
-MIT — use it, fork it, improve government.
+MIT — use it, fork it, improve government. See [LICENSE](LICENSE) for details.
 
 ## Credits
 

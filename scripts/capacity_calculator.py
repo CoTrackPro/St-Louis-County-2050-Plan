@@ -13,11 +13,9 @@ Usage:
     python scripts/capacity_calculator.py --interactive
 """
 
-import json
-import sys
 import argparse
+import json
 import math
-from typing import Any
 
 
 def factorial(n: int) -> int:
@@ -32,8 +30,8 @@ def erlang_c(servers: int, traffic_intensity: float) -> float:
     if rho >= 1:
         return 1.0  # System is overloaded
 
-    sum_terms = sum((traffic_intensity ** k) / factorial(k) for k in range(servers))
-    last_term = (traffic_intensity ** servers) / (factorial(servers) * (1 - rho))
+    sum_terms = sum((traffic_intensity**k) / factorial(k) for k in range(servers))
+    last_term = (traffic_intensity**servers) / (factorial(servers) * (1 - rho))
     return last_term / (sum_terms + last_term)
 
 
@@ -64,20 +62,22 @@ def calculate_queue_metrics(
     }
 
     if rho >= 1.0:
-        result.update({
-            "avg_wait_minutes": float("inf"),
-            "avg_total_time_minutes": float("inf"),
-            "prob_waiting": 1.0,
-            "avg_queue_length": float("inf"),
-            "daily_capacity": round(c * mu * hours_per_day),
-            "daily_demand": round(lam * hours_per_day),
-            "weekly_capacity": round(c * mu * hours_per_day * days_per_week),
-            "weekly_demand": round(lam * hours_per_day * days_per_week),
-            "capacity_margin_pct": round((1 - rho) * 100, 1),
-            "status": "🔴 OVERLOADED — system cannot sustain this load",
-            "recommendation": f"Need at least {math.ceil(lam / mu) + 1} servers (currently {c})",
-            "recommendations": [f"Need at least {math.ceil(lam / mu) + 1} servers (currently {c})"],
-        })
+        result.update(
+            {
+                "avg_wait_minutes": float("inf"),
+                "avg_total_time_minutes": float("inf"),
+                "prob_waiting": 1.0,
+                "avg_queue_length": float("inf"),
+                "daily_capacity": round(c * mu * hours_per_day),
+                "daily_demand": round(lam * hours_per_day),
+                "weekly_capacity": round(c * mu * hours_per_day * days_per_week),
+                "weekly_demand": round(lam * hours_per_day * days_per_week),
+                "capacity_margin_pct": round((1 - rho) * 100, 1),
+                "status": "🔴 OVERLOADED — system cannot sustain this load",
+                "recommendation": f"Need at least {math.ceil(lam / mu) + 1} servers (currently {c})",
+                "recommendations": [f"Need at least {math.ceil(lam / mu) + 1} servers (currently {c})"],
+            }
+        )
         return result
 
     # Erlang C
@@ -108,19 +108,21 @@ def calculate_queue_metrics(
     else:
         status = "🔴 OVERLOADED"
 
-    result.update({
-        "avg_wait_minutes": round(avg_wait, 1),
-        "avg_total_time_minutes": round(avg_system, 1),
-        "prob_waiting": round(pc, 3),
-        "prob_waiting_pct": round(pc * 100, 1),
-        "avg_queue_length": round(avg_queue, 1),
-        "daily_capacity": round(daily_capacity),
-        "daily_demand": round(daily_demand),
-        "weekly_capacity": round(weekly_capacity),
-        "weekly_demand": round(weekly_demand),
-        "capacity_margin_pct": round((1 - rho) * 100, 1),
-        "status": status,
-    })
+    result.update(
+        {
+            "avg_wait_minutes": round(avg_wait, 1),
+            "avg_total_time_minutes": round(avg_system, 1),
+            "prob_waiting": round(pc, 3),
+            "prob_waiting_pct": round(pc * 100, 1),
+            "avg_queue_length": round(avg_queue, 1),
+            "daily_capacity": round(daily_capacity),
+            "daily_demand": round(daily_demand),
+            "weekly_capacity": round(weekly_capacity),
+            "weekly_demand": round(weekly_demand),
+            "capacity_margin_pct": round((1 - rho) * 100, 1),
+            "status": status,
+        }
+    )
 
     # Staffing recommendations
     recs = []
@@ -155,7 +157,7 @@ def calculate_queue_metrics(
 def scenario_friday_closure(baseline_arrival: float, service_time: float, staff: int) -> dict:
     """Model impact of eliminating Friday service."""
     pre = calculate_queue_metrics(baseline_arrival, service_time, staff, 7.5, 5)
-    
+
     # Friday demand redistributes to Mon-Thu (25% increase per day)
     adjusted_arrival = baseline_arrival * 5 / 4
     post = calculate_queue_metrics(adjusted_arrival, service_time, staff, 7.5, 4)
@@ -217,7 +219,7 @@ def format_report(metrics: dict) -> str:
         if "description" in metrics:
             lines.append(f"*{metrics['description']}*")
         lines.append("")
-        
+
         if "impact" in metrics:
             lines.append("## Impact Summary")
             lines.append("")
@@ -274,8 +276,9 @@ def main():
     parser.add_argument("--staff", "-n", type=int, help="Number of service staff")
     parser.add_argument("--hours", type=float, default=7.5, help="Service hours per day")
     parser.add_argument("--days", type=int, default=4, help="Service days per week")
-    parser.add_argument("--scenario", choices=["friday-closure", "digital-shift", "add-staff"],
-                        help="Run a named scenario")
+    parser.add_argument(
+        "--scenario", choices=["friday-closure", "digital-shift", "add-staff"], help="Run a named scenario"
+    )
     parser.add_argument("--shift-pct", type=float, default=15, help="Digital shift percentage")
     parser.add_argument("--add-count", type=int, default=1, help="Staff to add in add-staff scenario")
     parser.add_argument("--output", "-o", help="Output file path")
@@ -308,6 +311,7 @@ def main():
             if isinstance(obj, list):
                 return [clean(v) for v in obj]
             return obj
+
         parts.append(json.dumps(clean(result), indent=2))
 
     output = "\n\n---\n\n".join(parts)

@@ -27,10 +27,9 @@ Input format (JSON array):
 Output: Scored KPIs with status, gap, trend, plus department composite.
 """
 
+import argparse
 import json
 import sys
-import argparse
-from typing import Any
 
 
 def score_kpi(kpi: dict) -> dict:
@@ -41,8 +40,14 @@ def score_kpi(kpi: dict) -> dict:
     direction = kpi.get("direction", "higher_is_better")
 
     if value is None or target is None:
-        return {**kpi, "status": "⚪", "status_label": "no_data",
-                "gap": None, "attainment_pct": None, "trend_pct": None}
+        return {
+            **kpi,
+            "status": "⚪",
+            "status_label": "no_data",
+            "gap": None,
+            "attainment_pct": None,
+            "trend_pct": None,
+        }
 
     # Calculate attainment (how close to target)
     if direction == "lower_is_better":
@@ -169,8 +174,7 @@ def main():
     parser.add_argument("--inline", help="Inline JSON string with KPI data")
     parser.add_argument("--department", "-d", help="Department ID (for labeling)")
     parser.add_argument("--output", "-o", help="Output file path (default: stdout)")
-    parser.add_argument("--format", "-f", choices=["json", "markdown", "both"], default="both",
-                        help="Output format")
+    parser.add_argument("--format", "-f", choices=["json", "markdown", "both"], default="both", help="Output format")
     args = parser.parse_args()
 
     # Load input

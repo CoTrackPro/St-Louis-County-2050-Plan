@@ -11,11 +11,10 @@ Usage:
     python scripts/scorecard_renderer.py --inline '{...}' --format markdown
 """
 
+import argparse
 import json
 import sys
-import argparse
 from datetime import datetime
-from typing import Any
 
 
 def render_sparkline_text(values: list[float]) -> str:
@@ -82,22 +81,26 @@ def render_markdown(data: dict) -> str:
     # Top priority
     priority_kpi = summary.get("top_priority")
     if priority_kpi:
-        lines.extend([
-            f"**⚡ Top Priority**: {priority_kpi.get('name', priority_kpi.get('kpi_id', ''))} "
-            f"— attainment {priority_kpi.get('attainment_pct')}%, gap {priority_kpi.get('gap')}",
-            "",
-        ])
+        lines.extend(
+            [
+                f"**⚡ Top Priority**: {priority_kpi.get('name', priority_kpi.get('kpi_id', ''))} "
+                f"— attainment {priority_kpi.get('attainment_pct')}%, gap {priority_kpi.get('gap')}",
+                "",
+            ]
+        )
 
     # Initiatives
     if initiatives:
-        lines.extend([
-            "---",
-            "",
-            "## Active Initiatives",
-            "",
-            "| # | Initiative | Status | Impact | Owner | Due |",
-            "|---|-----------|--------|--------|-------|-----|",
-        ])
+        lines.extend(
+            [
+                "---",
+                "",
+                "## Active Initiatives",
+                "",
+                "| # | Initiative | Status | Impact | Owner | Due |",
+                "|---|-----------|--------|--------|-------|-----|",
+            ]
+        )
         status_icons = {
             "complete": "🟢 Complete",
             "in_progress": "🔵 In Progress",
@@ -116,8 +119,10 @@ def render_markdown(data: dict) -> str:
     if risks:
         lines.extend(["---", "", "## Risks & Blockers", ""])
         for risk in risks:
-            lines.append(f"- **{risk.get('title', '')}**: {risk.get('description', '')}. "
-                         f"Mitigation: {risk.get('mitigation', 'TBD')}")
+            lines.append(
+                f"- **{risk.get('title', '')}**: {risk.get('description', '')}. "
+                f"Mitigation: {risk.get('mitigation', 'TBD')}"
+            )
         lines.append("")
 
     # Equity check
@@ -162,19 +167,27 @@ def render_html(data: dict) -> str:
     for k in kpis:
         unit = k.get("unit", "")
         status = k.get("status", "⚪")
-        status_class = "green" if "🟢" in status else "yellow" if "🟡" in status else "red" if "🔴" in status else "gray"
+        status_class = (
+            "green" if "🟢" in status else "yellow" if "🟡" in status else "red" if "🔴" in status else "gray"
+        )
         trend = k.get("trend_pct")
         trend_html = ""
         if trend is not None:
             arrow = "↑" if trend > 0 else "↓" if trend < 0 else "→"
-            color = "#059669" if k.get("trend_direction") == "improving" else "#DC2626" if k.get("trend_direction") == "declining" else "#6B7280"
+            color = (
+                "#059669"
+                if k.get("trend_direction") == "improving"
+                else "#DC2626"
+                if k.get("trend_direction") == "declining"
+                else "#6B7280"
+            )
             trend_html = f'<span style="color:{color}">{arrow} {abs(trend)}%</span>'
 
         kpi_rows += f"""
         <tr>
-            <td>{k.get('name', '')}</td>
-            <td><strong>{k.get('value', 'N/A')}</strong> {unit}</td>
-            <td>{k.get('target', 'N/A')} {unit}</td>
+            <td>{k.get("name", "")}</td>
+            <td><strong>{k.get("value", "N/A")}</strong> {unit}</td>
+            <td>{k.get("target", "N/A")} {unit}</td>
             <td>{trend_html}</td>
             <td><span class="status-badge {status_class}">{status}</span></td>
         </tr>"""
@@ -220,24 +233,24 @@ td {{ padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }}
 <div class="scorecard">
     <div class="header">
         <h1>{dept_name}</h1>
-        <div class="period">{period} | Updated {datetime.now().strftime('%Y-%m-%d')}</div>
+        <div class="period">{period} | Updated {datetime.now().strftime("%Y-%m-%d")}</div>
     </div>
     <div class="summary">
         <div class="summary-card">
             <div class="label">Overall</div>
-            <div class="value">{summary.get('overall_status', '⚪')}</div>
+            <div class="value">{summary.get("overall_status", "⚪")}</div>
         </div>
         <div class="summary-card">
             <div class="label">Composite</div>
-            <div class="value">{summary.get('composite_score', 'N/A')}%</div>
+            <div class="value">{summary.get("composite_score", "N/A")}%</div>
         </div>
         <div class="summary-card">
             <div class="label">Improving</div>
-            <div class="value" style="color:var(--green)">{summary.get('improving_count', 0)}</div>
+            <div class="value" style="color:var(--green)">{summary.get("improving_count", 0)}</div>
         </div>
         <div class="summary-card">
             <div class="label">Declining</div>
-            <div class="value" style="color:var(--red)">{summary.get('declining_count', 0)}</div>
+            <div class="value" style="color:var(--red)">{summary.get("declining_count", 0)}</div>
         </div>
     </div>
     <table>

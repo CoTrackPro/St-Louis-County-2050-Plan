@@ -11,11 +11,10 @@ Usage:
     python scripts/dashboard_generator.py --demo  # Uses sample data
 """
 
+import argparse
 import json
 import sys
-import argparse
 from pathlib import Path
-from datetime import datetime
 
 SKILL_DIR = Path(__file__).parent.parent
 SAMPLE_KPIS = SKILL_DIR / "assets" / "sample-kpis.json"
@@ -44,7 +43,7 @@ def generate_dashboard(departments_data: dict, title: str = "St. Louis County") 
     # Serialize department data for embedding
     data_json = json.dumps(departments_data, indent=2)
 
-    return f'''import {{ useState, useMemo }} from "react";
+    return f"""import {{ useState, useMemo }} from "react";
 import {{ LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine }} from "recharts";
 
 const DEPARTMENTS_DATA = {data_json};
@@ -271,16 +270,17 @@ export default function Dashboard() {{
       </div>
     </div>
   );
-}}'''
+}}"""
 
 
 def load_and_score(input_path: str) -> dict:
     """Load KPI data and organize by department."""
     import subprocess
+
     result = subprocess.run(
-        [sys.executable, str(SKILL_DIR / "scripts" / "kpi_scorer.py"),
-         "--input", input_path, "--format", "json"],
-        capture_output=True, text=True
+        [sys.executable, str(SKILL_DIR / "scripts" / "kpi_scorer.py"), "--input", input_path, "--format", "json"],
+        capture_output=True,
+        text=True,
     )
     if result.returncode != 0:
         print(f"Scorer error: {result.stderr}", file=sys.stderr)
@@ -373,20 +373,45 @@ def load_raw(input_path: str) -> dict:
                     status = "🟢" if att >= 90 else "🟡" if att >= 75 else "🔴"
                     trend_pct = round(((val - prior) / abs(prior)) * 100, 1) if prior and prior != 0 else None
                     if direction == "lower_is_better":
-                        trend_dir = "improving" if trend_pct and trend_pct < 0 else "declining" if trend_pct and trend_pct > 0 else "flat"
+                        trend_dir = (
+                            "improving"
+                            if trend_pct and trend_pct < 0
+                            else "declining"
+                            if trend_pct and trend_pct > 0
+                            else "flat"
+                        )
                     else:
-                        trend_dir = "improving" if trend_pct and trend_pct > 0 else "declining" if trend_pct and trend_pct < 0 else "flat"
+                        trend_dir = (
+                            "improving"
+                            if trend_pct and trend_pct > 0
+                            else "declining"
+                            if trend_pct and trend_pct < 0
+                            else "flat"
+                        )
                 else:
-                    att = None; gap = None; status = "⚪"; trend_pct = None; trend_dir = None
+                    att = None
+                    gap = None
+                    status = "⚪"
+                    trend_pct = None
+                    trend_dir = None
 
-                scored.append({**k, "attainment_pct": att, "gap": gap, "status": status,
-                              "trend_pct": trend_pct, "trend_direction": trend_dir})
+                scored.append(
+                    {
+                        **k,
+                        "attainment_pct": att,
+                        "gap": gap,
+                        "status": status,
+                        "trend_pct": trend_pct,
+                        "trend_direction": trend_dir,
+                    }
+                )
 
             atts = [s["attainment_pct"] for s in scored if s["attainment_pct"] is not None]
             composite = round(sum(min(a, 120) for a in atts) / len(atts), 1) if atts else None
             counts = {"🟢": 0, "🟡": 0, "🔴": 0}
             for s in scored:
-                if s["status"] in counts: counts[s["status"]] += 1
+                if s["status"] in counts:
+                    counts[s["status"]] += 1
 
             result[dept_id] = {
                 "department_name": dept_info["name"],
@@ -394,7 +419,11 @@ def load_raw(input_path: str) -> dict:
                 "department_summary": {
                     "composite_score": composite,
                     "status_counts": counts,
-                    "overall_status": "🔴" if counts["🔴"] >= 2 else "🟡" if counts["🔴"] >= 1 or counts["🟡"] >= 2 else "🟢",
+                    "overall_status": "🔴"
+                    if counts["🔴"] >= 2
+                    else "🟡"
+                    if counts["🔴"] >= 1 or counts["🟡"] >= 2
+                    else "🟢",
                     "improving_count": sum(1 for s in scored if s.get("trend_direction") == "improving"),
                     "declining_count": sum(1 for s in scored if s.get("trend_direction") == "declining"),
                 },

@@ -24,10 +24,9 @@ Input format (JSON array):
     ]
 """
 
+import argparse
 import json
 import sys
-import argparse
-from typing import Any
 
 # Domain-matched intervention lookup
 INTERVENTIONS = {
@@ -107,7 +106,11 @@ INTERVENTIONS = {
         4: [
             {"modality": "Full process/system overhaul", "hours": "80+", "cost": "high"},
             {"modality": "Performance management escalation", "hours": "N/A", "cost": "N/A"},
-            {"modality": "NOTE: Do NOT prescribe more training — this is a systems/accountability problem", "hours": "N/A", "cost": "N/A"},
+            {
+                "modality": "NOTE: Do NOT prescribe more training — this is a systems/accountability problem",
+                "hours": "N/A",
+                "cost": "N/A",
+            },
         ],
     },
 }
@@ -136,9 +139,7 @@ def calculate_gap(assessment: dict) -> dict:
     # Cap gap at 4 for intervention lookup
     lookup_gap = min(gap, 4)
 
-    priority_label, priority_action = PRIORITY_LABELS.get(
-        min(gap, 4), ("⛔ Critical", "role_review_required")
-    )
+    priority_label, priority_action = PRIORITY_LABELS.get(min(gap, 4), ("⛔ Critical", "role_review_required"))
 
     # Get domain-matched interventions
     domain_interventions = INTERVENTIONS.get(domain, INTERVENTIONS["knowledge"])
@@ -219,15 +220,17 @@ def generate_report(gaps: list[dict], department: str = "unknown") -> str:
     met = sum(1 for g in gaps if g["gap_score"] == 0)
     avg_gap = round(sum(g["gap_score"] for g in gaps) / total, 1) if total else 0
 
-    lines.extend([
-        f"- **Competencies assessed**: {total}",
-        f"- **Average gap score**: {avg_gap}",
-        f"- **Met/exceeded (gap 0)**: {met}",
-        f"- **Low gaps (1)**: {low}",
-        f"- **Medium gaps (2)**: {high}",
-        f"- **Critical gaps (3+)**: {critical}",
-        "",
-    ])
+    lines.extend(
+        [
+            f"- **Competencies assessed**: {total}",
+            f"- **Average gap score**: {avg_gap}",
+            f"- **Met/exceeded (gap 0)**: {met}",
+            f"- **Low gaps (1)**: {low}",
+            f"- **Medium gaps (2)**: {high}",
+            f"- **Critical gaps (3+)**: {critical}",
+            "",
+        ]
+    )
 
     # Domain distribution
     domain_gaps = {}
@@ -249,7 +252,9 @@ def generate_report(gaps: list[dict], department: str = "unknown") -> str:
     for d in ["knowledge", "skill", "attitude", "behavior"]:
         scores = domain_gaps.get(d, [])
         if scores:
-            lines.append(f"| {d.title()} | {len(scores)} | {round(sum(scores)/len(scores),1)} | {max(scores)} | {fix_map.get(d, '')} |")
+            lines.append(
+                f"| {d.title()} | {len(scores)} | {round(sum(scores) / len(scores), 1)} | {max(scores)} | {fix_map.get(d, '')} |"
+            )
     lines.append("")
 
     # Heat map
@@ -292,7 +297,9 @@ def generate_report(gaps: list[dict], department: str = "unknown") -> str:
         for g in critical_gaps:
             lines.append(f"### {g.get('name', g.get('competency_id'))}")
             lines.append(f"- **Domain**: {g.get('domain', '').title()}")
-            lines.append(f"- **Current → Target**: {g.get('assessed_level')} → {g.get('target_level')} (gap: +{g['gap_score']})")
+            lines.append(
+                f"- **Current → Target**: {g.get('assessed_level')} → {g.get('target_level')} (gap: +{g['gap_score']})"
+            )
             lines.append(f"- **Staff affected**: {g.get('staff_count', '?')}")
             lines.append(f"- **Linked KPIs**: {', '.join(g.get('linked_kpis', ['N/A']))}")
             lines.append(f"- **Assessment method**: {g.get('assessment_method', 'N/A')}")
