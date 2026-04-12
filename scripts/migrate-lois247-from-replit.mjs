@@ -222,14 +222,21 @@ function transformCourseNotes(rows) {
 }
 
 function transformSessions(rows) {
-  return rows.map(r => ({
-    PK: pk.session(r.id ?? r.session_id),
+  const now = Date.now();
+  // Skip expired sessions — these are transient Express/connect-pg-simple
+  // OAuth state entries with no long-term value.
+  const active = rows.filter(r => {
+    const exp = r.expire ?? r.expires_at ?? r.expiresAt;
+    return exp ? new Date(exp).getTime() > now : true;
+  });
+  return active.map(r => ({
+    PK: pk.session(r.sid ?? r.id ?? r.session_id),
     SK: sk.metadata(),
     entityType: "SESSION",
-    sessionId:  String(r.id ?? r.session_id),
-    userId:     r.user_id   ? String(r.user_id) : null,
-    data:       r.data      ?? r.session_data ?? null,
-    expiresAt:  iso(r.expires_at ?? r.expiresAt),
+    sessionId:  String(r.sid ?? r.id ?? r.session_id),
+    userId:     r.user_id ? String(r.user_id) : null,
+    data:       r.sess ?? r.data ?? r.session_data ?? null,
+    expiresAt:  iso(r.expire ?? r.expires_at ?? r.expiresAt),
     createdAt:  iso(r.created_at),
   }));
 }
