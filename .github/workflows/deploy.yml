@@ -36,100 +36,94 @@ jobs:
               --query "Parameter.Value" --output text 2>/dev/null || echo ""
           }
 
-          # ── Core ────────────────────────────────────────────────────────────
-          APP_NAME=$(fetch "/cotrackpro/prod/core/app/name")
-          BASE_URL=$(fetch "/cotrackpro/prod/core/app/base_url")
-          APP_ENV=$(fetch  "/cotrackpro/prod/core/app/environment")
-          JWT_SECRET=$(fetch        "/cotrackpro/prod/core/security/jwt_secret")
-          ENCRYPTION_KEY=$(fetch    "/cotrackpro/prod/core/security/encryption_key")
-          SESSION_SECRET=$(fetch    "/cotrackpro/prod/core/security/session_secret")
+          # ── App ─────────────────────────────────────────────────────────────
+          APP_NAME=$(fetch "/cotrackpro/prod/app/name")
+          BASE_URL=$(fetch "/cotrackpro/prod/app/base_url")
+          APP_ENV=$(fetch  "/cotrackpro/prod/app/environment")
 
-          # ── Stripe ──────────────────────────────────────────────────────────
-          STRIPE_PUB=$(fetch         "/cotrackpro/prod/integrations/stripe/publishable_key")
-          STRIPE_SECRET=$(fetch      "/cotrackpro/prod/integrations/stripe/secret_key")
-          STRIPE_WEBHOOK=$(fetch     "/cotrackpro/prod/integrations/stripe/webhook_secret")
-          STRIPE_PROD_PARENT=$(fetch "/cotrackpro/prod/integrations/stripe/products/parent")
-          STRIPE_PROD_PRO=$(fetch    "/cotrackpro/prod/integrations/stripe/products/professional")
-          PRICE_PARENT_MO=$(fetch    "/cotrackpro/prod/integrations/stripe/prices/parent/monthly")
-          PRICE_PARENT_AN=$(fetch    "/cotrackpro/prod/integrations/stripe/prices/parent/annual")
-          PRICE_PRO_MO=$(fetch       "/cotrackpro/prod/integrations/stripe/prices/professional/monthly")
-          PRICE_PRO_AN=$(fetch       "/cotrackpro/prod/integrations/stripe/prices/professional/annual")
+          # ── Security ────────────────────────────────────────────────────────
+          JWT_SECRET=$(fetch     "/cotrackpro/prod/security/jwt_secret")
+          ENCRYPTION_KEY=$(fetch "/cotrackpro/prod/security/encryption_key")
+          SESSION_SECRET=$(fetch "/cotrackpro/prod/security/session_secret")
 
           # ── Clerk ────────────────────────────────────────────────────────────
-          CLERK_PUB=$(fetch    "/cotrackpro/prod/platform/clerk/publishable_key")
-          CLERK_SECRET=$(fetch "/cotrackpro/prod/platform/clerk/secret_key")
+          CLERK_PUB=$(fetch    "/cotrackpro/prod/auth/clerk/publishable_key")
+          CLERK_SECRET=$(fetch "/cotrackpro/prod/auth/clerk/secret_key")
+          CLERK_ORG_ID=$(fetch "/cotrackpro/shared/auth/clerk/organization_id")
+
+          # ── Stripe ──────────────────────────────────────────────────────────
+          STRIPE_PUB=$(fetch         "/cotrackpro/prod/payments/stripe/publishable_key")
+          STRIPE_SECRET=$(fetch      "/cotrackpro/prod/payments/stripe/secret_key")
+          STRIPE_WEBHOOK=$(fetch     "/cotrackpro/prod/payments/stripe/webhook_secret")
+          STRIPE_PROD_PARENT=$(fetch "/cotrackpro/prod/payments/stripe/products/parent")
+          STRIPE_PROD_PRO=$(fetch    "/cotrackpro/prod/payments/stripe/products/professional")
+          PRICE_PARENT_MO=$(fetch    "/cotrackpro/prod/payments/stripe/prices/parent/monthly")
+          PRICE_PARENT_AN=$(fetch    "/cotrackpro/prod/payments/stripe/prices/parent/annual")
+          PRICE_PRO_MO=$(fetch       "/cotrackpro/prod/payments/stripe/prices/professional/monthly")
+          PRICE_PRO_AN=$(fetch       "/cotrackpro/prod/payments/stripe/prices/professional/annual")
 
           # ── SES ──────────────────────────────────────────────────────────────
-          SES_FROM=$(fetch              "/cotrackpro/prod/integrations/ses/from_address")
-          SES_KEY_ID=$(fetch_optional   "/ses/aws_access_key_id")
-          SES_SECRET=$(fetch_optional   "/ses/aws_secret_access_key")
-
-          # ── AI ───────────────────────────────────────────────────────────────
-          AI_PROVIDER=$(fetch             "/cotrackpro/prod/integrations/ai/default_provider")
-          ANTHROPIC_KEY=$(fetch_optional  "/cotrackpro/prod/integrations/ai/anthropic_api_key")
-          OPENAI_KEY=$(fetch_optional     "/cotrackpro/prod/integrations/ai/openai_api_key")
-          GEMINI_KEY=$(fetch_optional     "/cotrackpro/prod/integrations/ai/gemini_api_key")
-
-          # ── ElevenLabs ───────────────────────────────────────────────────────
-          EL_KEY=$(fetch_optional     "/cotrackpro/prod/integrations/elevenlabs/api_key")
-          EL_VOICE=$(fetch_optional   "/cotrackpro/prod/integrations/elevenlabs/voice_id")
+          SES_FROM=$(fetch   "/cotrackpro/prod/email/ses/from_address")
+          SES_KEY_ID=$(fetch "/cotrackpro/shared/email/ses/access_key_id")
+          SES_SECRET=$(fetch "/cotrackpro/shared/email/ses/secret_access_key")
 
           # ── Mailchimp ────────────────────────────────────────────────────────
-          MAILCHIMP_KEY=$(fetch_optional "/cotrackpro/prod/integrations/mailchimp/api_key")
+          MAILCHIMP_KEY=$(fetch_optional "/cotrackpro/shared/email/mailchimp/marketing_api_key")
 
-          # ── Infrastructure ───────────────────────────────────────────────────
-          S3_BUCKET=$(fetch    "/cotrackpro/prod/infrastructure/s3/assets_bucket")
-          DYNAMO_TABLE=$(fetch "/cotrackpro/prod/infrastructure/dynamodb/users_table")
+          # ── AI ───────────────────────────────────────────────────────────────
+          AI_PROVIDER=$(fetch            "/cotrackpro/prod/ai/default_provider")
+          ANTHROPIC_KEY=$(fetch          "/cotrackpro/prod/ai/anthropic/api_key")
 
-          # ── Monitoring ───────────────────────────────────────────────────────
-          HIGHLIGHT_ID=$(fetch_optional "/cotrackpro/prod/monitoring/highlight/project_id")
+          # ── ElevenLabs ───────────────────────────────────────────────────────
+          EL_KEY=$(fetch_optional "/cotrackpro/shared/media/elevenlabs/api_key")
+
+          # ── Storage ──────────────────────────────────────────────────────────
+          S3_BUCKET=$(fetch         "/cotrackpro/prod/storage/s3/assets_bucket")
+          DYNAMO_TABLE=$(fetch      "/cotrackpro/prod/storage/dynamodb/users_table")
+          DYNAMO_EVENTS=$(fetch     "/cotrackpro/prod/storage/dynamodb/events_table")
 
           # Mask all secrets so they never appear in logs
           echo "::add-mask::$JWT_SECRET"
           echo "::add-mask::$ENCRYPTION_KEY"
           echo "::add-mask::$SESSION_SECRET"
+          echo "::add-mask::$CLERK_SECRET"
           echo "::add-mask::$STRIPE_SECRET"
           echo "::add-mask::$STRIPE_WEBHOOK"
-          echo "::add-mask::$CLERK_SECRET"
           echo "::add-mask::$SES_KEY_ID"
           echo "::add-mask::$SES_SECRET"
           echo "::add-mask::$ANTHROPIC_KEY"
-          echo "::add-mask::$OPENAI_KEY"
-          echo "::add-mask::$GEMINI_KEY"
-          echo "::add-mask::$EL_KEY"
           echo "::add-mask::$MAILCHIMP_KEY"
+          echo "::add-mask::$EL_KEY"
 
           # Export for next step
-          echo "app_name=$APP_NAME"                 >> $GITHUB_OUTPUT
-          echo "base_url=$BASE_URL"                 >> $GITHUB_OUTPUT
-          echo "app_env=$APP_ENV"                   >> $GITHUB_OUTPUT
-          echo "jwt_secret=$JWT_SECRET"             >> $GITHUB_OUTPUT
-          echo "encryption_key=$ENCRYPTION_KEY"     >> $GITHUB_OUTPUT
-          echo "session_secret=$SESSION_SECRET"     >> $GITHUB_OUTPUT
-          echo "stripe_pub=$STRIPE_PUB"             >> $GITHUB_OUTPUT
-          echo "stripe_secret=$STRIPE_SECRET"       >> $GITHUB_OUTPUT
-          echo "stripe_webhook=$STRIPE_WEBHOOK"     >> $GITHUB_OUTPUT
+          echo "app_name=$APP_NAME"                       >> $GITHUB_OUTPUT
+          echo "base_url=$BASE_URL"                       >> $GITHUB_OUTPUT
+          echo "app_env=$APP_ENV"                         >> $GITHUB_OUTPUT
+          echo "jwt_secret=$JWT_SECRET"                   >> $GITHUB_OUTPUT
+          echo "encryption_key=$ENCRYPTION_KEY"           >> $GITHUB_OUTPUT
+          echo "session_secret=$SESSION_SECRET"           >> $GITHUB_OUTPUT
+          echo "clerk_pub=$CLERK_PUB"                     >> $GITHUB_OUTPUT
+          echo "clerk_secret=$CLERK_SECRET"               >> $GITHUB_OUTPUT
+          echo "clerk_org_id=$CLERK_ORG_ID"               >> $GITHUB_OUTPUT
+          echo "stripe_pub=$STRIPE_PUB"                   >> $GITHUB_OUTPUT
+          echo "stripe_secret=$STRIPE_SECRET"             >> $GITHUB_OUTPUT
+          echo "stripe_webhook=$STRIPE_WEBHOOK"           >> $GITHUB_OUTPUT
           echo "stripe_prod_parent=$STRIPE_PROD_PARENT"   >> $GITHUB_OUTPUT
           echo "stripe_prod_pro=$STRIPE_PROD_PRO"         >> $GITHUB_OUTPUT
-          echo "price_parent_mo=$PRICE_PARENT_MO"   >> $GITHUB_OUTPUT
-          echo "price_parent_an=$PRICE_PARENT_AN"   >> $GITHUB_OUTPUT
-          echo "price_pro_mo=$PRICE_PRO_MO"         >> $GITHUB_OUTPUT
-          echo "price_pro_an=$PRICE_PRO_AN"         >> $GITHUB_OUTPUT
-          echo "clerk_pub=$CLERK_PUB"               >> $GITHUB_OUTPUT
-          echo "clerk_secret=$CLERK_SECRET"         >> $GITHUB_OUTPUT
-          echo "ses_from=$SES_FROM"                 >> $GITHUB_OUTPUT
-          echo "ses_key_id=$SES_KEY_ID"             >> $GITHUB_OUTPUT
-          echo "ses_secret=$SES_SECRET"             >> $GITHUB_OUTPUT
-          echo "ai_provider=$AI_PROVIDER"           >> $GITHUB_OUTPUT
-          echo "anthropic_key=$ANTHROPIC_KEY"       >> $GITHUB_OUTPUT
-          echo "openai_key=$OPENAI_KEY"             >> $GITHUB_OUTPUT
-          echo "gemini_key=$GEMINI_KEY"             >> $GITHUB_OUTPUT
-          echo "el_key=$EL_KEY"                     >> $GITHUB_OUTPUT
-          echo "el_voice=$EL_VOICE"                 >> $GITHUB_OUTPUT
-          echo "mailchimp_key=$MAILCHIMP_KEY"       >> $GITHUB_OUTPUT
-          echo "s3_bucket=$S3_BUCKET"               >> $GITHUB_OUTPUT
-          echo "dynamo_table=$DYNAMO_TABLE"         >> $GITHUB_OUTPUT
-          echo "highlight_id=$HIGHLIGHT_ID"         >> $GITHUB_OUTPUT
+          echo "price_parent_mo=$PRICE_PARENT_MO"         >> $GITHUB_OUTPUT
+          echo "price_parent_an=$PRICE_PARENT_AN"         >> $GITHUB_OUTPUT
+          echo "price_pro_mo=$PRICE_PRO_MO"               >> $GITHUB_OUTPUT
+          echo "price_pro_an=$PRICE_PRO_AN"               >> $GITHUB_OUTPUT
+          echo "ses_from=$SES_FROM"                       >> $GITHUB_OUTPUT
+          echo "ses_key_id=$SES_KEY_ID"                   >> $GITHUB_OUTPUT
+          echo "ses_secret=$SES_SECRET"                   >> $GITHUB_OUTPUT
+          echo "mailchimp_key=$MAILCHIMP_KEY"             >> $GITHUB_OUTPUT
+          echo "ai_provider=$AI_PROVIDER"                 >> $GITHUB_OUTPUT
+          echo "anthropic_key=$ANTHROPIC_KEY"             >> $GITHUB_OUTPUT
+          echo "el_key=$EL_KEY"                           >> $GITHUB_OUTPUT
+          echo "s3_bucket=$S3_BUCKET"                     >> $GITHUB_OUTPUT
+          echo "dynamo_table=$DYNAMO_TABLE"               >> $GITHUB_OUTPUT
+          echo "dynamo_events=$DYNAMO_EVENTS"             >> $GITHUB_OUTPUT
 
       - name: Install Vercel CLI
         run: npm install -g vercel
@@ -147,13 +141,26 @@ jobs:
             fi
           }
 
-          # Core
-          inject NEXT_PUBLIC_APP_NAME        "${{ steps.ssm.outputs.app_name }}"
-          inject NEXT_PUBLIC_URL             "${{ steps.ssm.outputs.base_url }}"
-          inject APP_ENVIRONMENT             "${{ steps.ssm.outputs.app_env }}"
-          inject JWT_SECRET                  "${{ steps.ssm.outputs.jwt_secret }}"
-          inject ENCRYPTION_KEY              "${{ steps.ssm.outputs.encryption_key }}"
-          inject SESSION_SECRET              "${{ steps.ssm.outputs.session_secret }}"
+          # App
+          inject NEXT_PUBLIC_APP_NAME  "${{ steps.ssm.outputs.app_name }}"
+          inject NEXT_PUBLIC_URL       "${{ steps.ssm.outputs.base_url }}"
+          inject APP_ENVIRONMENT       "${{ steps.ssm.outputs.app_env }}"
+
+          # Security
+          inject JWT_SECRET       "${{ steps.ssm.outputs.jwt_secret }}"
+          inject ENCRYPTION_KEY   "${{ steps.ssm.outputs.encryption_key }}"
+          inject SESSION_SECRET   "${{ steps.ssm.outputs.session_secret }}"
+
+          # Clerk
+          inject NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY  "${{ steps.ssm.outputs.clerk_pub }}"
+          inject CLERK_SECRET_KEY                   "${{ steps.ssm.outputs.clerk_secret }}"
+          inject CLERK_ORG_ID                       "${{ steps.ssm.outputs.clerk_org_id }}"
+
+          # Clerk routing (static)
+          inject NEXT_PUBLIC_CLERK_SIGN_IN_URL        "/sign-in"
+          inject NEXT_PUBLIC_CLERK_SIGN_UP_URL        "/sign-up"
+          inject NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL  "/dashboard"
+          inject NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL  "/billing"
 
           # Stripe
           inject NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY  "${{ steps.ssm.outputs.stripe_pub }}"
@@ -166,41 +173,25 @@ jobs:
           inject STRIPE_PRICE_PROFESSIONAL_MONTHLY   "${{ steps.ssm.outputs.price_pro_mo }}"
           inject STRIPE_PRICE_PROFESSIONAL_ANNUAL    "${{ steps.ssm.outputs.price_pro_an }}"
 
-          # Clerk
-          inject NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY   "${{ steps.ssm.outputs.clerk_pub }}"
-          inject CLERK_SECRET_KEY                    "${{ steps.ssm.outputs.clerk_secret }}"
-
-          # Clerk routing (static)
-          inject NEXT_PUBLIC_CLERK_SIGN_IN_URL          "/sign-in"
-          inject NEXT_PUBLIC_CLERK_SIGN_UP_URL          "/sign-up"
-          inject NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL    "/dashboard"
-          inject NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL    "/billing"
-
           # SES
           inject SES_FROM_ADDRESS          "${{ steps.ssm.outputs.ses_from }}"
           inject SES_AWS_ACCESS_KEY_ID     "${{ steps.ssm.outputs.ses_key_id }}"
           inject SES_AWS_SECRET_ACCESS_KEY "${{ steps.ssm.outputs.ses_secret }}"
 
-          # AI (optional)
-          inject AI_DEFAULT_PROVIDER  "${{ steps.ssm.outputs.ai_provider }}"
-          inject ANTHROPIC_API_KEY    "${{ steps.ssm.outputs.anthropic_key }}"
-          inject OPENAI_API_KEY       "${{ steps.ssm.outputs.openai_key }}"
-          inject GEMINI_API_KEY       "${{ steps.ssm.outputs.gemini_key }}"
-
-          # ElevenLabs (optional)
-          inject ELEVENLABS_API_KEY  "${{ steps.ssm.outputs.el_key }}"
-          inject ELEVENLABS_VOICE_ID "${{ steps.ssm.outputs.el_voice }}"
-
           # Mailchimp (optional)
           inject MAILCHIMP_API_KEY "${{ steps.ssm.outputs.mailchimp_key }}"
 
-          # Infrastructure
-          inject S3_ASSETS_BUCKET       "${{ steps.ssm.outputs.s3_bucket }}"
-          inject DYNAMODB_USERS_TABLE   "${{ steps.ssm.outputs.dynamo_table }}"
+          # AI
+          inject AI_DEFAULT_PROVIDER "${{ steps.ssm.outputs.ai_provider }}"
+          inject ANTHROPIC_API_KEY   "${{ steps.ssm.outputs.anthropic_key }}"
 
-          # Highlight.io (optional)
-          inject HIGHLIGHT_PROJECT_ID              "${{ steps.ssm.outputs.highlight_id }}"
-          inject NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID  "${{ steps.ssm.outputs.highlight_id }}"
+          # ElevenLabs (optional)
+          inject ELEVENLABS_API_KEY "${{ steps.ssm.outputs.el_key }}"
+
+          # Storage
+          inject S3_ASSETS_BUCKET        "${{ steps.ssm.outputs.s3_bucket }}"
+          inject DYNAMODB_USERS_TABLE    "${{ steps.ssm.outputs.dynamo_table }}"
+          inject DYNAMODB_EVENTS_TABLE   "${{ steps.ssm.outputs.dynamo_events }}"
 
       - name: Build & Deploy
         run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
