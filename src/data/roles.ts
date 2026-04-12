@@ -1,7 +1,7 @@
 
-import { 
-  Briefcase, Users, HeartHandshake, Gavel, Search, Shield, Eye, Siren, 
-  ClipboardList, Landmark, FileSearch, MessageSquare, Brain, Lock, Clock 
+import {
+  Briefcase, Users, HeartHandshake, Gavel,
+  FileSearch, MessageSquare, Brain, Lock, Clock
 } from 'lucide-react';
 import { Role, RoleDetailContent } from './types';
 

@@ -42,6 +42,13 @@ vi.mock("@/lib/monitoring", () => ({
   captureError: (...args: unknown[]) => mockCaptureError(...args),
 }));
 
+vi.mock("@/lib/dynamo", () => ({
+  deduplicateEvent:       vi.fn().mockResolvedValue(true),
+  upsertUser:             vi.fn().mockResolvedValue(undefined),
+  updateUserSubscription: vi.fn().mockResolvedValue(undefined),
+  revokeUserAccess:       vi.fn().mockResolvedValue(undefined),
+}));
+
 // Must be set BEFORE import — WEBHOOK_SECRET is captured at module load time
 process.env.STRIPE_WEBHOOK_SECRET = "whsec_test";
 const { POST } = await import("@/app/api/stripe/webhook/route");

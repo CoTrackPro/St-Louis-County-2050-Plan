@@ -5,11 +5,11 @@ import { ChevronDown } from "lucide-react";
 import { FAQ_CATEGORIES } from "@/data/content";
 
 export default function FAQSection() {
+  const [activeCategory, setActiveCategory] = useState(FAQ_CATEGORIES[0]?.id ?? "");
+  const [openItem, setOpenItem] = useState<string | null>(null);
+
   // Guard: nothing to render if data is empty
   if (!FAQ_CATEGORIES.length) return null;
-
-  const [activeCategory, setActiveCategory] = useState(FAQ_CATEGORIES[0].id);
-  const [openItem, setOpenItem] = useState<string | null>(null);
 
   // Safe fallback — never throws even if state is stale after a hot-reload
   const active = FAQ_CATEGORIES.find((c) => c.id === activeCategory) ?? FAQ_CATEGORIES[0];

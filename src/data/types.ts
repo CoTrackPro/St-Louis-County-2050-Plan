@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { LucideIcon } from 'lucide-react';
 
 // Removed conflicting module augmentations to restore standard JSX elements.
